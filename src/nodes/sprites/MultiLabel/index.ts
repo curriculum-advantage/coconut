@@ -1,3 +1,5 @@
+// TODO: This file needs heavy cleanup for lint and type errors. Remove all @ts-ignore in file.
+
 import { escapeRegExp, findKey, values as ObjectValues } from 'lodash';
 import { detect } from 'detect-browser';
 import { sub, sup } from './helpers/superSubScripts';
@@ -22,9 +24,8 @@ class MultiLabel extends cc.LayerColor {
     horizontalAlignment = 'left',
     lineHeight = 1.2,
     position = [250, 250],
-    scaleFactor = 2,
     wordSpace = 3.5,
-  } = {}, objectParameters = {}) {
+  } = {}, objectParameters: { styleSyntaxes?: object } = {}) {
     super(cc.color(255, 255, 255, 0));
     this.setAnchorPoint(...anchor);
     this.setContentSize(containerWidth, containerHeight);
@@ -183,7 +184,7 @@ class MultiLabel extends cc.LayerColor {
         currentLine.push(previousLabel);
         lines = lines.map((line, index) => {
           if (index === lines.length - 1) {
-            return line.filter((lineLabel, labelIndex) => labelIndex !== line.length - 1);
+            return line.filter((_lineLabel, labelIndex) => labelIndex !== line.length - 1);
           }
           return line;
         });
@@ -282,10 +283,10 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color) => createLabel(this, {
+    const createTextLabel = (labelText, labelWeight, labelStyle, color) => createLabel({
+      parent: this,
       text: labelText,
       fontSize,
-      scaleFactor,
       fontWeight: labelWeight,
       fontStyle: labelStyle,
       anchor: [0, 0],
@@ -352,6 +353,7 @@ class MultiLabel extends cc.LayerColor {
       const { styleFontStyle, color, textLabel } = createStyledLabel(styling, updatedText);
 
       const drawObject = {
+        // @ts-ignore
         underline: styling.underlineSyntax,
         color,
         styleFontStyle,
@@ -382,10 +384,12 @@ class MultiLabel extends cc.LayerColor {
         onTouchBegan: () => true,
         onTouchEnded: event => {
           if (areaClick && isPointOnTarget(event, this)) {
+            // @ts-ignore
             clickHandler(labels);
           } else {
             labels.some((label, index) => {
               if (isPointOnTarget(event, label)) {
+                // @ts-ignore
                 clickHandler(label, index);
                 return true;
               }
@@ -419,6 +423,7 @@ class MultiLabel extends cc.LayerColor {
       symbols = [];
       drawingSyntaxes = [];
       entities = [];
+      // @ts-ignore
       if (hasOtherSyntaxes && objectParameters.reset) objectParameters.reset();
     };
 
@@ -432,7 +437,8 @@ class MultiLabel extends cc.LayerColor {
     const underlineLabel = ({ x, y, width }, color) => {
       let yOffset = 3;
       if (browser.name === 'ie' || browser.name === 'edge') yOffset = 0;
-      const underline = createRect(this, {
+      const underline = createRect({
+        parent: this,
         position: [x - 2, y + yOffset],
         size: [width + 3, fontSize * 0.05],
         color: [...color, 255],
@@ -451,6 +457,7 @@ class MultiLabel extends cc.LayerColor {
           underlineLabel(labels[index].getBoundingBox(), drawingSyntax.color);
         }
         if (hasOtherSyntaxes) {
+          // @ts-ignore
           objectParameters.drawSymbol(
             drawingSyntax,
             labels[index].getBoundingBox(),

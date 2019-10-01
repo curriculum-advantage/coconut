@@ -1,3 +1,5 @@
+// TODO: This file needs heavy cleanup for lint errors.
+
 const Promise = require('bluebird');
 const bb = Promise.promisifyAll(require('fs'));
 const mjAPI = require('mathjax-node-svg2png');

@@ -145,7 +145,8 @@ class Paragraph extends cc.Node {
       fontName = this.fontName,
     } = {},
   ) {
-    const label = createLabel(this.currentWordNode, {
+    const label = createLabel({
+      parent: this.currentWordNode,
       text,
       color,
       opacity,
@@ -154,7 +155,7 @@ class Paragraph extends cc.Node {
       fontStyle,
       fontName,
       anchor: [0, 0],
-      position: this.nextCharLabelPos(),
+      position: this.nextCharLabelPos() as Point,
     });
 
     this.charLabels.push(label);

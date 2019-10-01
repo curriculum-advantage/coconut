@@ -16,6 +16,8 @@
 
 import { Howl } from 'howler';
 
+type audioCallback = () => void;
+
 let queue = [];
 let effectQueue = [];
 let currentAudio = null;
@@ -45,7 +47,15 @@ const playNext = () => {
  * execute regardless of whether the audio ends or is manually stopped.
  */
 export const queueAudio = (source, {
-  onPlay, onEnd, onStop, onDone,
+  onPlay,
+  onEnd,
+  onStop,
+  onDone,
+}: {
+  onPlay?: audioCallback;
+  onEnd?: audioCallback;
+  onStop?: audioCallback;
+  onDone?: audioCallback;
 } = {}) => {
   queue.push(new Howl({
     src: [source],
@@ -86,10 +96,16 @@ export const queueAudio = (source, {
  */
 export const playEffect = (source, {
   volume,
-  onPlay = () => {},
-  onEnd = () => {},
+  onPlay,
+  onEnd,
   loop,
   autoplay = true,
+}: {
+  volume?: number;
+  onPlay?: audioCallback;
+  onEnd?: audioCallback;
+  loop?: boolean;
+  autoplay?: boolean;
 } = {}) => {
   const effect = new Howl({
     volume,

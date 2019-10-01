@@ -46,7 +46,7 @@ describe('populateArray function', () => {
   it('should return a unique, populated array with the correct length when a isDuplicate callback is provided', () => {
     const length = 6;
     const generateItem = createGenerateItemFn();
-    expect(populateArray(length, generateItem, isDuplicate)).toMatchSnapshot();
+    expect(populateArray(length, generateItem, true, isDuplicate)).toMatchSnapshot();
   });
 });
 

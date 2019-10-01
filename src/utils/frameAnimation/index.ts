@@ -50,18 +50,25 @@ const fileNumber = (number, placeCount) => {
  * fileNumPlaceCount, but this would be a breaking change.
  */
 
-const frameAnimation = (
-  firstArgument: { delay?: number; loops?: number } | [number, string],
-  ...rest: [number, string]
-) => {
+type FrameOptions = { delay?: number; loops?: number };
+type FrameSet = [number, string, number?, number?, number[]?];
+
+// TODO: Need to correctly type this function after looking through TypeScript documentation.
+// In fact, we should probably just refactor the function signature since everyone seems to get
+// confused by it. This would require the first frameSet argument to be wrapped in an additional
+// array, but that seems like a small price to pay for a cleaner function. Example signature:
+// const frameAnimation = (frameSets: FrameSet[], frameSettings?: FrameOptions = {})
+const frameAnimation = (firstArgument: FrameOptions | FrameSet, ...rest: FrameSet[]) => {
   const optionsSupplied = isPlainObject(firstArgument);
-  const customSettings = optionsSupplied ? firstArgument : {};
-  const { delay, loops } = { delay: 0.111, loops: 1, ...customSettings };
+  const frameSettings = optionsSupplied ? firstArgument : {};
+  // @ts-ignore
+  const { delay = 0.111, loops = 1 } = frameSettings;
   const frameSets = optionsSupplied ? rest : [firstArgument, ...rest];
 
   const frames = frameSets.reduce(
     (
       accumulator,
+      // @ts-ignore
       [
         frameNumberEnd,
         staticFilePath,

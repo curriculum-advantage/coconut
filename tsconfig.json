@@ -18,9 +18,6 @@
     // Modern browser support.
     "target": "es5",
 
-    // Enable all strict type checking options.
-    "strict": true,
-
     /* Additional lint rules */
 
     "forceConsistentCasingInFileNames": true,

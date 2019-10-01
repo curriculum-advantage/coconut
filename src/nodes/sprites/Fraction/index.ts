@@ -1,6 +1,10 @@
+// TODO: This file needs heavy cleanup for lint errors.
+
 import createLabel from '../../../utils/createLabel';
 import createRect from '../../../utils/createRect';
 import { containsSuperScript } from '../MultiLabel/helpers/superSubScripts';
+
+const pipe = (...fns) => fns.reduce((v, f) => f(v));
 
 class Fraction extends cc.Node {
   constructor({
@@ -8,13 +12,12 @@ class Fraction extends cc.Node {
     numerator = '',
     denominator = '',
     fontSize = 12,
-    color = [0, 0, 0],
+    color = [0, 0, 0] as Color,
   } = {}) {
     super();
     const wholeNumberOffset = 5;
     let adjustedFontSize = fontSize;
 
-    const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
     let width = 0;
     let height = 0;
 
@@ -25,11 +28,12 @@ class Fraction extends cc.Node {
       this.setContentSize(width, height);
     };
 
-    const addNumberLabel = (text, position) => createLabel(this, {
+    const addNumberLabel = (text, position) => createLabel({
+      parent: this,
       text,
       color,
       position,
-      adjustedFontSize,
+      fontSize: adjustedFontSize,
       anchor: [0, 0],
       verticalAlign: containsSuperScript(text) ? 'bottom' : 'top',
     });
@@ -105,7 +109,8 @@ class Fraction extends cc.Node {
         height: pipeObjectHeight,
       } = numeratorLabel.getBoundingBox();
       const yPosition = y + (pipeObjectHeight * 0.35) - 5;
-      createRect(this, {
+      createRect({
+        parent: this,
         position: [from, yPosition],
         size: [to, fontSize / 20],
         color,
@@ -147,17 +152,15 @@ class Fraction extends cc.Node {
       this.getChildren().forEach(child => child.setPositionY(child.getBoundingBox().y + changeInY));
     };
 
-    (() => {
-      pipe(
-        setWholeNumber,
-        setNumerator,
-        setDenominator,
-        repositionX,
-        drawFractionBar,
-        recalculateSizePositionX,
-        repositionY,
-      )();
-    })();
+    pipe(
+      setWholeNumber,
+      setNumerator,
+      setDenominator,
+      repositionX,
+      drawFractionBar,
+      recalculateSizePositionX,
+      repositionY,
+    )();
   }
 }
 

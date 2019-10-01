@@ -26,6 +26,7 @@
     "clean": "cross-env rimraf dist",
     "lint": "cross-env eslint --ext .js,.ts src",
     "types": "cross-env tsc",
+    "types-strict": "cross-env tsc --strict",
     "types:watch": "cross-env npm run types -- --watch",
     "test": "cross-env jest --passWithNoTests",
     "test:watch": "cross-env jest --passWithNoTests --watch --notify",

@@ -2,14 +2,13 @@ import { range } from 'lodash';
 
 export const itemExists = (array, item) => array.includes(item);
 
-export const populateArray = (length, generateItem, unique = false) => {
-  const isDuplicate = typeof unique === 'function' ? unique : itemExists;
-  return new Array(length).fill(null).reduce((accumulator, _currentItem, index) => {
+export const populateArray = (length, generateItem, unique = false, isDuplicate = itemExists) => (
+  new Array(length).fill(null).reduce((accumulator, _currentItem, index) => {
     let newItem = generateItem(index);
     if (unique) while (isDuplicate(accumulator, newItem)) newItem = generateItem(index);
     return [...accumulator, newItem];
-  }, []);
-};
+  }, [])
+);
 
 export const createPrandoIntGenerator = (rng, rangeArray) => {
   const prandoRange = range(rangeArray[0], rangeArray[1] + 1);
@@ -40,7 +39,7 @@ export const createPrandoIntGenerator = (rng, rangeArray) => {
  */
 export const prandoShuffle = (rng, array, allElementsUnidentifiable = false) => {
   const getIndex = createPrandoIntGenerator(rng, [0, array.length - 1]);
-  const createArray = () => new Array(array.length).fill(null).reduce((accumulator) => (
+  const createArray = () => new Array(array.length).fill(null).reduce(accumulator => (
     [...accumulator, array[getIndex()]]
   ), []);
 
@@ -55,10 +54,15 @@ export const prandoShuffle = (rng, array, allElementsUnidentifiable = false) => 
 };
 
 export const prandoDigits = (rng, length, {
-  unique = false,
-  zeros = false,
+  unique,
+  zeros,
   start,
   end,
+}: {
+  unique?: boolean;
+  zeros?: boolean;
+  start?: number;
+  end?: number;
 } = {}) => {
   const numberDigits = typeof length === 'number' ? length : rng.nextInt(length[0], length[1]);
   const generateDigit = dynamicStart => rng.nextInt(start || dynamicStart, end || 9);
@@ -73,7 +77,7 @@ export const createPrandoDistributor = (rng, totalCount, typesArray) => {
   let lastIndex = null;
   let lastTypeName = null;
 
-  return (iterationIndex) => {
+  return iterationIndex => {
     const wasDuplicateQuestion = iterationIndex === lastIndex;
     if (wasDuplicateQuestion) return lastTypeName;
 
