@@ -5,18 +5,18 @@
 
     // Search under node_modules for non-relative imports.
     "moduleResolution": "node",
-  
+
     // Generates corresponding d.ts files.
     "declaration": true,
 
     // Only emit ‘.d.ts’ declaration files. Let Babel handle compilation via Webpack.
     "emitDeclarationOnly": true,
 
-    // Concatenate and emit output to single file.
-    "outFile": "dist/main.d.ts",
+    // Emit declaration files to webpack's build directory.
+    "outDir": "dist/",
 
-    // Target latest version of ECMAScript.
-    "target": "esnext",
+    // Modern browser support.
+    "target": "es5",
 
     // Enable all strict type checking options.
     "strict": true,

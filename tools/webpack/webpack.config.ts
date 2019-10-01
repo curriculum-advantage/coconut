@@ -7,7 +7,7 @@ const config: webpack.Configuration = {
   output: {
     libraryTarget: 'umd',
     globalObject: 'this',
-    library: 'coconut'
+    library: 'coconut',
   },
   module: {
     rules: [
