@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2019-10-02
+
+### Fixed
+
 * Fix IntelliSense for projects using this package.
 * Update package to only include build files.
 * Fix type errors.
