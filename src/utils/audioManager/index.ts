@@ -61,8 +61,8 @@ export const queueAudio = (source, {
     src: [source],
     onplay: onPlay,
     onend(id) {
-      if (onEnd) onEnd();
-      if (onDone) onDone();
+      if (typeof onEnd === 'function') onEnd();
+      if (typeof onDone === 'function') onDone();
       lastEndedId = id;
       currentAudio = null;
       playNext();
@@ -71,8 +71,8 @@ export const queueAudio = (source, {
       const didPseudoStop = lastEndedId === id; // (See bug #2 above)
 
       if (!didPseudoStop) {
-        if (onStop) onStop();
-        if (onDone) onDone();
+        if (typeof onStop === 'function') onStop();
+        if (typeof onDone === 'function') onDone();
       }
     },
   }));
@@ -111,12 +111,12 @@ export const playEffect = (source, {
     volume,
     loop,
     onplay: () => {
-      onPlay();
+      if (typeof onPlay === 'function') onPlay();
       effectQueue = effectQueue.filter(audio => audio !== effect);
       effectQueue.push(effect);
     },
     onend: () => {
-      onEnd();
+      if (typeof onEnd === 'function') onEnd();
       effectQueue = effectQueue.filter(audio => audio !== effect);
     },
     onstop: () => {

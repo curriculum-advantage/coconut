@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+* Fix audioManager type errors.
+
 ## [1.0.1] - 2019-10-02
 
 ### Fixed
