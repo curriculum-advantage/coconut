@@ -152,15 +152,17 @@ class Fraction extends cc.Node {
       this.getChildren().forEach(child => child.setPositionY(child.getBoundingBox().y + changeInY));
     };
 
-    pipe(
-      setWholeNumber,
-      setNumerator,
-      setDenominator,
-      repositionX,
-      drawFractionBar,
-      recalculateSizePositionX,
-      repositionY,
-    )();
+    (() => {
+      pipe(
+        setWholeNumber,
+        setNumerator,
+        setDenominator,
+        repositionX,
+        drawFractionBar,
+        recalculateSizePositionX,
+        repositionY,
+      )();
+    })();
   }
 }
 
