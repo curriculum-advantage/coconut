@@ -4,7 +4,7 @@ import createLabel from '../../../utils/createLabel';
 import createRect from '../../../utils/createRect';
 import { containsSuperScript } from '../MultiLabel/helpers/superSubScripts';
 
-const pipe = (...fns) => fns.reduce((v, f) => f(v));
+const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
 
 class Fraction extends cc.Node {
   constructor({
