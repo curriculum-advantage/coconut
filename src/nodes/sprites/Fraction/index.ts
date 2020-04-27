@@ -153,6 +153,7 @@ class Fraction extends cc.Node {
     };
 
     (() => {
+      // @ts-ignore
       pipe(
         setWholeNumber,
         setNumerator,

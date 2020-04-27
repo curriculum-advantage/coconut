@@ -51,6 +51,8 @@ class MultiLabel extends cc.LayerColor {
     let offsetForFraction = false;
     let previousWasShift = false;
 
+    let wasClicked = false;
+
     const browser = detect();
 
     // Current supported markup
@@ -384,6 +386,7 @@ class MultiLabel extends cc.LayerColor {
         onTouchBegan: () => true,
         onTouchEnded: event => {
           if (areaClick && isPointOnTarget(event, this)) {
+            wasClicked = true;
             // @ts-ignore
             clickHandler(labels);
           } else {
@@ -518,6 +521,12 @@ class MultiLabel extends cc.LayerColor {
     };
 
     this.getLabels = () => labels;
+
+    this.wasClicked = () => wasClicked;
+
+    this.resetClicked = () => {
+      wasClicked = false;
+    };
   }
 }
 
