@@ -8,7 +8,7 @@ import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
 import Fraction from '../Fraction';
 
-class MultiLabel extends cc.LayerColor {
+class MultiLabelV2 extends cc.LayerColor {
   constructor(
     {
       anchor = [0, 0],
@@ -540,4 +540,4 @@ class MultiLabel extends cc.LayerColor {
   }
 }
 
-export default MultiLabel;
+export default MultiLabelV2;
