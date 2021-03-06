@@ -9,27 +9,35 @@ import isPointOnTarget from '../../../utils/isPointOnTarget';
 import Fraction from '../Fraction';
 
 class MultiLabel extends cc.LayerColor {
-  constructor({
-    anchor = [0, 0],
-    areaClick = false,
-    clickHandler = () => {},
-    containerWidth = 250,
-    containerHeight = 100,
-    defaultFillIn = '_____',
-    fontColorHighlight = [21, 15, 242],
-    fontColorPrimary = [0, 0, 0],
-    fontSize = 16,
-    fontStyle = 'normal', // normal or italic
-    fontWeight = 400,
-    horizontalAlignment = 'left',
-    lineHeight = 1.2,
-    position = [250, 250],
-    wordSpace = 3.5,
-  } = {}, objectParameters: { styleSyntaxes?: object } = {}) {
+  constructor(
+    {
+      anchor = [0, 0],
+      areaClick = false,
+      clickHandler = () => {},
+      containerWidth = 250,
+      containerHeight = 100,
+      defaultFillIn = '_____',
+      fontColorHighlight = [21, 15, 242],
+      fontColorPrimary = [0, 0, 0],
+      fontSize = 16,
+      fontStyle = 'normal', // normal or italic
+      fontWeight = 400,
+      horizontalAlignment = 'left',
+      lineHeight = 1.2,
+      position = [250, 250],
+      wordSpace = 3.5,
+      defaultText = '',
+    } = {},
+    objectParameters: { styleSyntaxes?: object } = {},
+  ) {
     super(cc.color(255, 255, 255, 0));
     this.setAnchorPoint(...anchor);
     this.setContentSize(containerWidth, containerHeight);
     this.setPosition(...position);
+
+    if (defaultText) {
+      this.setString(defaultText);
+    }
 
     let displayedText;
     let numberReplacedFillIns = 0;
@@ -45,9 +53,8 @@ class MultiLabel extends cc.LayerColor {
     let drawingSyntaxes = [];
     let fillIns = [];
     const hasOtherSyntaxes = Object.keys(objectParameters).length > 0;
-    const otherSyntaxes = hasOtherSyntaxes && objectParameters.styleSyntaxes
-      ? objectParameters.styleSyntaxes
-      : {};
+    const otherSyntaxes =
+      hasOtherSyntaxes && objectParameters.styleSyntaxes ? objectParameters.styleSyntaxes : {};
     let offsetForFraction = false;
     let previousWasShift = false;
 
@@ -113,9 +120,9 @@ class MultiLabel extends cc.LayerColor {
      * @param {string} unmarkText the text to be marked up for styling prior to rendering
      * @returns {string} the marked up text to be styled prior to rendering
      */
-    const notateStyles = unmarkText => {
+    const notateStyles = (unmarkText) => {
       let updatedText = unmarkText;
-      ObjectValues(styleSyntaxes).forEach(syntax => {
+      ObjectValues(styleSyntaxes).forEach((syntax) => {
         if (updatedText.includes(syntax)) {
           const endSyntax = syntax.replace('[', '[/');
           while (updatedText.includes(endSyntax)) {
@@ -132,11 +139,11 @@ class MultiLabel extends cc.LayerColor {
      * @param {string} markText the marked up text to check.
      * @returns {object} an objected containing all the styling to be applied to the marked up text.
      */
-    const getStyling = markText => {
+    const getStyling = (markText) => {
       const styles = {};
-      ObjectValues(styleSyntaxes).forEach(syntax => {
+      ObjectValues(styleSyntaxes).forEach((syntax) => {
         if (markText.includes(syntax)) {
-          styles[findKey(styleSyntaxes, o => o === syntax)] = true;
+          styles[findKey(styleSyntaxes, (o) => o === syntax)] = true;
         }
       });
       return styles;
@@ -147,9 +154,9 @@ class MultiLabel extends cc.LayerColor {
      * @param markText the string with all the marking for the supported styling.
      * @returns {string} the string without the styling markup
      */
-    const cleanText = markText => {
+    const cleanText = (markText) => {
       let cleanedText = markText;
-      ObjectValues(styleSyntaxes).forEach(syntax => {
+      ObjectValues(styleSyntaxes).forEach((syntax) => {
         if (syntax === '[BLANK]' && cleanedText.includes(syntax)) {
           cleanedText = cleanedText.replace(
             new RegExp(escapeRegExp(syntax), 'g'),
@@ -168,18 +175,17 @@ class MultiLabel extends cc.LayerColor {
     const breakLine = () => {
       positionX = 0;
       if (offsetForFraction) {
-        currentLine.forEach(label => label.setPositionY(label.getPositionY() - (lineOffset / 2)));
+        currentLine.forEach((label) => label.setPositionY(label.getPositionY() - lineOffset / 2));
       }
-      positionY -= (lineOffset + (offsetForFraction ? lineOffset : 0));
+      positionY -= lineOffset + (offsetForFraction ? lineOffset : 0);
       lines.push(currentLine.slice());
       currentLine = [];
       offsetForFraction = false;
     };
 
     const concat = (label, changeY = true) => {
-      const previousLabel = currentLine.length > 0
-        ? currentLine[currentLine.length - 1]
-        : labels[labels.length - 1];
+      const previousLabel =
+        currentLine.length > 0 ? currentLine[currentLine.length - 1] : labels[labels.length - 1];
       const previousBoundingBox = previousLabel.getBoundingBox();
       if (!previousWasShift && positionY !== previousBoundingBox.y) {
         previousLabel.setPosition(positionX, positionY);
@@ -200,8 +206,8 @@ class MultiLabel extends cc.LayerColor {
       if (changeY) label.setPositionY(positionY);
     };
 
-    const shouldBreakLine = (width, hasLinebreak) => positionX + width > containerWidth
-      || hasLinebreak;
+    const shouldBreakLine = (width, hasLinebreak) =>
+      positionX + width > containerWidth || hasLinebreak;
 
     const checkWidth = (width, hasLinebreak) => {
       if (shouldBreakLine(width, hasLinebreak)) breakLine();
@@ -238,8 +244,8 @@ class MultiLabel extends cc.LayerColor {
       }
     };
 
-    const shouldOffsetBold = bold => bold && browser
-      && (browser.name === 'ie' || browser.name === 'edge');
+    const shouldOffsetBold = (bold) =>
+      bold && browser && (browser.name === 'ie' || browser.name === 'edge');
 
     /**
      * Position a specific label by default starting at the top left corner in sequence lines and
@@ -255,7 +261,7 @@ class MultiLabel extends cc.LayerColor {
         if (shouldOffsetBold(styling.boldSyntax)) {
           label.setDimensions(
             label.getBoundingBox().width,
-            label.getBoundingBox().height + (fontSize * 0.24),
+            label.getBoundingBox().height + fontSize * 0.24,
           );
         }
         label.setPosition(positionX, positionY);
@@ -266,13 +272,13 @@ class MultiLabel extends cc.LayerColor {
       positionX += width + wordOffset;
     };
 
-    const formatSuperSubScript = text => {
+    const formatSuperSubScript = (text) => {
       let updatedText = text;
       if (updatedText.includes('[SUBSCRIPT]') || updatedText.includes('[SUPERSCRIPT]')) {
         const syntax = updatedText.includes('[SUBSCRIPT]') ? '[SUBSCRIPT]' : '[SUPERSCRIPT]';
         const func = updatedText.includes('[SUBSCRIPT]') ? sub : sup;
         const splitString = updatedText.split(syntax);
-        const updatedTextMap = splitString.map(value => {
+        const updatedTextMap = splitString.map((value) => {
           if (value.includes('[') && value.includes(']')) {
             const previous = value.split('[');
             const exponent = previous[1].split(']');
@@ -285,16 +291,17 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color) => createLabel({
-      parent: this,
-      text: labelText,
-      fontSize,
-      fontWeight: labelWeight,
-      fontStyle: labelStyle,
-      anchor: [0, 0],
-      position: [0, 0],
-      color,
-    });
+    const createTextLabel = (labelText, labelWeight, labelStyle, color) =>
+      createLabel({
+        parent: this,
+        text: labelText,
+        fontSize,
+        fontWeight: labelWeight,
+        fontStyle: labelStyle,
+        anchor: [0, 0],
+        position: [0, 0],
+        color,
+      });
 
     /**
      * Convert Fraction labeled text into fraction
@@ -306,7 +313,7 @@ class MultiLabel extends cc.LayerColor {
     const getFractionLabel = (text, color) => {
       let fraction;
       let fText = text.replace(new RegExp('_', 'g'), ' ').split('|');
-      fText = fText.map(value => formatSuperSubScript(value));
+      fText = fText.map((value) => formatSuperSubScript(value));
       if (fText.length === 3) {
         fraction = { whole: fText[0], numerator: fText[1], denominator: fText[2] };
       } else fraction = { numerator: fText[0], denominator: fText[1] };
@@ -320,7 +327,7 @@ class MultiLabel extends cc.LayerColor {
 
     const getOtherDrawSyntaxes = (styling = {}) => {
       const additionalSyntaxes = {};
-      Object.getOwnPropertyNames(otherSyntaxes).forEach(syntax => {
+      Object.getOwnPropertyNames(otherSyntaxes).forEach((syntax) => {
         additionalSyntaxes[syntax.replace('Syntax', '')] = styling[syntax];
       });
 
@@ -348,7 +355,7 @@ class MultiLabel extends cc.LayerColor {
       return { styleFontStyle, color, textLabel };
     };
 
-    const createAndAddLabel = text => {
+    const createAndAddLabel = (text) => {
       const styling = getStyling(text);
       const updatedText = cleanText(text);
 
@@ -368,43 +375,46 @@ class MultiLabel extends cc.LayerColor {
     };
 
     const setHorizontalPosition = () => {
-      lines.forEach(line => {
+      lines.forEach((line) => {
         const lastWordInLine = line[line.length - 1];
         const { width, x } = lastWordInLine.getBoundingBox();
         const offset = (containerWidth - (x + width)) / (horizontalAlignment === 'center' ? 2 : 1);
 
-        line.forEach(word => {
+        line.forEach((word) => {
           word.setPositionX(word.getPositionX() + offset);
         });
       });
     };
 
     const addListener = () => {
-      cc.eventManager.addListener({
-        event: cc.EventListener.TOUCH_ONE_BY_ONE,
-        swallowTouches: false,
-        onTouchBegan: () => true,
-        onTouchEnded: event => {
-          if (areaClick && isPointOnTarget(event, this)) {
-            wasClicked = true;
-            // @ts-ignore
-            clickHandler(labels);
-          } else {
-            labels.some((label, index) => {
-              if (isPointOnTarget(event, label)) {
-                // @ts-ignore
-                clickHandler(label, index);
-                return true;
-              }
-              return false;
-            });
-          }
+      cc.eventManager.addListener(
+        {
+          event: cc.EventListener.TOUCH_ONE_BY_ONE,
+          swallowTouches: false,
+          onTouchBegan: () => true,
+          onTouchEnded: (event) => {
+            if (areaClick && isPointOnTarget(event, this)) {
+              wasClicked = true;
+              // @ts-ignore
+              clickHandler(labels);
+            } else {
+              labels.some((label, index) => {
+                if (isPointOnTarget(event, label)) {
+                  // @ts-ignore
+                  clickHandler(label, index);
+                  return true;
+                }
+                return false;
+              });
+            }
+          },
         },
-      }, this);
+        this,
+      );
     };
 
     // create default blank underscore strings for every fill-in-blank formatting syntax found
-    const initiateFillIns = text => {
+    const initiateFillIns = (text) => {
       const regExp = new RegExp(escapeRegExp(styleSyntaxes.blankSyntax), 'g');
       const fillInCount = (text.match(regExp) || []).length;
       fillIns = new Array(fillInCount).fill(defaultFillIn);
@@ -416,9 +426,9 @@ class MultiLabel extends cc.LayerColor {
       positionY = containerHeight - lineOffset - 5;
       offsetForFraction = false;
       previousWasShift = false;
-      labels.forEach(label => label.removeFromParent());
-      symbols.forEach(symbol => symbol.removeFromParent());
-      entities.forEach(entity => entity.removeFromParent());
+      labels.forEach((label) => label.removeFromParent());
+      symbols.forEach((symbol) => symbol.removeFromParent());
+      entities.forEach((entity) => entity.removeFromParent());
 
       currentLine = [];
       lines = [];
@@ -471,12 +481,12 @@ class MultiLabel extends cc.LayerColor {
     };
 
     const reposition = () => {
-      const actualHeight = containerHeight + (-1 * positionY);
+      const actualHeight = containerHeight + -1 * positionY;
       this.setContentSize(containerWidth, actualHeight);
-      const changeInHeight = (actualHeight - containerHeight);
+      const changeInHeight = actualHeight - containerHeight;
       positionY = actualHeight - lineOffset - 5;
-      lines.forEach(line => {
-        line.forEach(label => {
+      lines.forEach((line) => {
+        line.forEach((label) => {
           label.setPositionY(label.getBoundingBox().y + changeInHeight);
         });
         positionY -= lineOffset;
@@ -487,7 +497,7 @@ class MultiLabel extends cc.LayerColor {
 
     const render = (text = displayedText) => {
       reset();
-      text.split(' ').forEach(string => createAndAddLabel(string));
+      text.split(' ').forEach((string) => createAndAddLabel(string));
       lines.push(currentLine.slice());
       currentLine = [];
       if (horizontalAlignment !== 'left') setHorizontalPosition();
@@ -495,7 +505,7 @@ class MultiLabel extends cc.LayerColor {
       addAndPositionDrawingMarkup();
     };
 
-    this.setString = text => {
+    this.setString = (text) => {
       displayedText = text;
       const updatedText = notateStyles(text);
       initiateFillIns(displayedText);
@@ -515,7 +525,7 @@ class MultiLabel extends cc.LayerColor {
       render();
     };
 
-    this.resetBlank = index => {
+    this.resetBlank = (index) => {
       fillIns[index] = defaultFillIn;
       render();
     };
