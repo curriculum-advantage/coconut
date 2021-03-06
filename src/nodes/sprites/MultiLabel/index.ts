@@ -501,10 +501,6 @@ class MultiLabel extends cc.LayerColor {
       addAndPositionDrawingMarkup();
     };
 
-    if (defaultText) {
-      this.setString(defaultText);
-    }
-
     this.setString = (text) => {
       displayedText = text;
       const updatedText = notateStyles(text);
@@ -512,6 +508,10 @@ class MultiLabel extends cc.LayerColor {
       render(updatedText);
       addListener();
     };
+
+    if (defaultText) {
+      this.setString(defaultText);
+    }
 
     /**
      * Display a white solid background unless otherwise specified
