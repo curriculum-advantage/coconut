@@ -8,8 +8,9 @@ export const replaceLabel = (label, text) => {
   const { parent, ...labelProperties } = label;
   console.log('file: index.ts ~ line 9 ~ labelProperties', labelProperties);
   const newLabel = createLabel({
+    parent,
     ...labelProperties,
-    fontSize: 30,
+    fontSize: 20,
   });
   // 1. get label's parent
   console.log('file: index.ts ~ line 9 ~ parent', parent);
