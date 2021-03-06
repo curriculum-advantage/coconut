@@ -1,9 +1,9 @@
 /*
-  * TODO: Waiting on TypeScript ranges feature to accurately type acceptable numbers for color,
-  * opacity, anchor, etc.
-  *
-  * TODO: node/scene/layer/label typings for cc (cocos)
-  */
+ * TODO: Waiting on TypeScript ranges feature to accurately type acceptable numbers for color,
+ * opacity, anchor, etc.
+ *
+ * TODO: node/scene/layer/label typings for cc (cocos)
+ */
 
 // TODO:
 import { primaryFont } from '../../lib/constants';
@@ -58,7 +58,7 @@ const createLabel = ({
   text = '',
   opacity = 255,
   fontName = primaryFont,
-  fontSize = 16,
+  fontSize = 2,
   dimensions = [0, 0] as Point,
   horizontalAlign = 'left' as HorizontalAlignment,
   verticalAlign = 'top' as VerticalAlignment,
