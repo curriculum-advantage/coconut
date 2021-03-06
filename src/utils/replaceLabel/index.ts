@@ -6,7 +6,7 @@ export const replaceLabel = (label, text) => {
   // how to remove current label?
   // will have to grab off every single possible param here
   const { ...labelProps } = label;
-  const newLabel = new createLabel({
+  const newLabel = createLabel({
     ...labelProps,
     fontSize: 30,
   });

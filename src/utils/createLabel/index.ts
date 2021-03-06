@@ -86,23 +86,6 @@ const createLabel = ({
   setLabel(label, anchor, position);
   addLabel(label, parent, zOrder);
 
-  this.superSetText = (label, text) => {
-    // how to remove current label?
-    // will have to grab off every single possible param here
-    const { containerWidth, position, fontColorPrimary, fontSize, textColor } = label;
-    const newLabel = new MultiLabel({
-      containerWidth,
-      position,
-      fontColorPrimary: textColor,
-      fontSize,
-      text,
-    });
-    // 1. get label's parent
-    // 2. detach label from parent
-    // 3. attach new label to label's parent
-    return newLabel;
-  };
-
   return label;
 };
 
