@@ -35,10 +35,6 @@ class MultiLabel extends cc.LayerColor {
     this.setContentSize(containerWidth, containerHeight);
     this.setPosition(...position);
 
-    if (defaultText) {
-      this.setString(defaultText);
-    }
-
     let displayedText;
     let numberReplacedFillIns = 0;
     const lineOffset = fontSize * lineHeight;
@@ -504,6 +500,10 @@ class MultiLabel extends cc.LayerColor {
       reposition();
       addAndPositionDrawingMarkup();
     };
+
+    if (defaultText) {
+      this.setString(defaultText);
+    }
 
     this.setString = (text) => {
       displayedText = text;
