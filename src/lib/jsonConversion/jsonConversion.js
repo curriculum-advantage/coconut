@@ -44,10 +44,10 @@ const generateMathImage = (math, dir, fileName) => {
       scale: 0.5,
     })
     .then(
-      data => {
+      (data) => {
         if (!data.errors) base64ToImage(data.png, `${dir}/`, { fileName });
       },
-      error => {
+      (error) => {
         console.log(error);
         console.log(math);
       },
@@ -150,21 +150,21 @@ const resolveJsonPromise = (filePromises, fileNames, dirName) => {
   });
 };
 
-const readJsonFiles = dirName => {
+const readJsonFiles = (dirName) => {
   const promises = [];
   const fileNames = [];
   new Promise((fulfil, reject) => {
     bb.readdir(dirName, (error, files) => {
       fileNames.push(...files);
       if (error) reject(error);
-      fileNames.forEach(filename => promises.push(bb.readFileAsync(dirName + filename)));
+      fileNames.forEach((filename) => promises.push(bb.readFileAsync(dirName + filename)));
       fulfil(Promise.all(promises));
     });
   }).then(
-    filePromises => {
+    (filePromises) => {
       resolveJsonPromise(filePromises, fileNames, dirName);
     },
-    error => {
+    (error) => {
       console.log(error);
     },
   );

@@ -5,13 +5,17 @@ export const replaceLabel = (label, text) => {
   console.log('text:', text);
   // how to remove current label?
   // will have to grab off every single possible param here
-  const { ...labelProps } = label;
+  const { parent, ...labelProperties } = label;
+  console.log('file: index.ts ~ line 9 ~ labelProperties', labelProperties);
   const newLabel = createLabel({
-    ...labelProps,
+    ...labelProperties,
     fontSize: 30,
   });
   // 1. get label's parent
+  console.log('file: index.ts ~ line 9 ~ parent', parent);
   // 2. detach label from parent
+  label.removeFromParent();
   // 3. attach new label to label's parent
+  parent.addChild(newLabel);
   return newLabel;
 };
