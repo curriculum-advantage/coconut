@@ -47,3 +47,20 @@ export const setStrokeTextStyles = (label, strokeSize: number, strokeColor: Colo
 export const addLabel = (label, parent, zOrder) => {
   if (parent) parent.addChild(label, zOrder);
 };
+
+export const replaceLabel = (oldLabel, newText) => {
+  // how to remove current label?
+  // will have to grab off every single possible param here
+  const { containerWidth, position, fontColorPrimary, fontSize, textColor } = label;
+  const newLabel = new MultiLabel({
+    containerWidth,
+    position,
+    fontColorPrimary: textColor,
+    fontSize,
+    text,
+  });
+  // 1. get label's parent
+  // 2. detach label from parent
+  // 3. attach new label to label's parent
+  return newLabel;
+};

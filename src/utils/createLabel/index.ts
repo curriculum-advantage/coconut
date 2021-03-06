@@ -1,9 +1,9 @@
 /*
-  * TODO: Waiting on TypeScript ranges feature to accurately type acceptable numbers for color,
-  * opacity, anchor, etc.
-  *
-  * TODO: node/scene/layer/label typings for cc (cocos)
-  */
+ * TODO: Waiting on TypeScript ranges feature to accurately type acceptable numbers for color,
+ * opacity, anchor, etc.
+ *
+ * TODO: node/scene/layer/label typings for cc (cocos)
+ */
 
 // TODO:
 import { primaryFont } from '../../lib/constants';
@@ -84,6 +84,8 @@ const createLabel = ({
   setStrokeTextStyles(label, strokeSize, strokeColor);
   setLabel(label, anchor, position);
   addLabel(label, parent, zOrder);
+  replaceLabel(oldLabel, newText);
+  console.log('testingCreateLabel!!!');
 
   return label;
 };
