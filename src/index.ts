@@ -1,3 +1,5 @@
+import { replaceMultiLabel } from './utils/replaceMultiLabel/index';
+import { replaceLabel } from './utils/replaceLabel/index';
 import 'core-js';
 
 import BackgroundLayer from './nodes/layers/BackgroundLayer';
@@ -40,8 +42,6 @@ import createPseudorandomNumberGenerator from './utils/createPseudorandomNumberG
 import getParameterByName from './utils/getParameterByName';
 import setGlobals from './utils/setGlobals';
 import embeddedQuestionsGenerator from './utils/embeddedQuestionsGenerator';
-import replaceLabel from './utils/replaceLabel';
-import replaceMultiLabel from './utils/replaceMultiLabel';
 
 export {
   BackgroundLayer,
