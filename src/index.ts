@@ -40,14 +40,14 @@ import createPseudorandomNumberGenerator from './utils/createPseudorandomNumberG
 import getParameterByName from './utils/getParameterByName';
 import setGlobals from './utils/setGlobals';
 import embeddedQuestionsGenerator from './utils/embeddedQuestionsGenerator';
+import replaceLabel from './utils/replaceLabel';
+import replaceMultiLabel from './utils/replaceMultiLabel';
 
 export {
   BackgroundLayer,
-
   MultiLabel,
   Paragraph,
   Input,
-
   addChildren,
   createDoubleTapDetector,
   createLabel,
@@ -66,25 +66,23 @@ export {
   playEffect,
   playBackgroundAudio,
   stopBackgroundAudio,
-
   markDebugLoaded,
   updateDebugScore,
-
   itemExists,
   populateArray,
   createPrandoIntGenerator,
   prandoShuffle,
   prandoDigits,
   createPrandoDistributor,
-
   createPseudorandomNumberGenerator,
   getParameterByName,
   setGlobals,
   embeddedQuestionsGenerator,
-
   stopHintInterval,
   setHintInterval,
   resetHintInterval,
+  replaceLabel,
+  replaceMultiLabel,
 };
 
 const coconut = {
@@ -131,6 +129,9 @@ const coconut = {
   stopHintInterval,
   setHintInterval,
   resetHintInterval,
+
+  replaceLabel,
+  replaceMultiLabel,
 };
 
 export default coconut;
