@@ -84,7 +84,7 @@ const createLabel = ({
   setStrokeTextStyles(label, strokeSize, strokeColor);
   setLabel(label, anchor, position);
   addLabel(label, parent, zOrder);
-  replaceLabel(oldLabel, newText);
+  // replaceLabel(oldLabel, newText);
   console.log('testingCreateLabel!!!');
 
   return label;
