@@ -53,13 +53,12 @@ import {
  *   opacity: 100,
  * });
  */
-
 const createLabel = ({
   parent = null,
   text = '',
   opacity = 255,
   fontName = primaryFont,
-  fontSize = 10,
+  fontSize = 16,
   dimensions = [0, 0] as Point,
   horizontalAlign = 'left' as HorizontalAlignment,
   verticalAlign = 'top' as VerticalAlignment,
@@ -80,23 +79,6 @@ const createLabel = ({
     textAlignment(false, horizontalAlign),
     textAlignment(true, verticalAlign),
   );
-
-  label.parent = parent;
-  label.text = text;
-  label.opacity = opacity;
-  label.fontName = fontName;
-  label.fontSize = fontSize;
-  label.dimensions = dimensions;
-  label.horizontalAlign = horizontalAlign;
-  label.verticalAlign = verticalAlign;
-  label.fontWeight = fontWeight;
-  label.fontStyle = fontStyle;
-  label.position = position;
-  label.color = color;
-  label.strokeColor = strokeColor;
-  label.strokeSize = strokeSize;
-  label.anchor = anchor;
-  label.zOrder = zOrder;
 
   setBaseTextStyles(label, fontWeight, fontStyle, color, opacity);
   setStrokeTextStyles(label, strokeSize, strokeColor);
