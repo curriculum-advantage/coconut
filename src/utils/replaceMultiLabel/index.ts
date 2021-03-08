@@ -9,8 +9,8 @@ export const replaceMultiLabel = (parent, label, text) => {
   const { fontSize, ...labelProperties } = label;
   console.log('labelProperties', labelProperties);
   const newMultiLabel = new MultiLabel({
-    defaultText: text,
     ...labelProperties,
+    defaultText: text,
   });
   console.log(' newMultiLabel', newMultiLabel);
   label.removeFromParent();
