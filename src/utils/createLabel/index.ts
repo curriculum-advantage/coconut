@@ -71,23 +71,6 @@ const createLabel = ({
   anchor = [0.5, 0.5] as Point,
   zOrder = 0,
 } = {}) => {
-  this.parent = parent;
-  this.text = text;
-  this.opacity = opacity;
-  this.fontName = fontName;
-  this.fontSize = fontSize;
-  this.dimensions = dimensions;
-  this.horizontalAlign = horizontalAlign;
-  this.verticalAlign = verticalAlign;
-  this.fontWeight = fontWeight;
-  this.fontStyle = fontStyle;
-  this.position = position;
-  this.color = color;
-  this.strokeColor = strokeColor;
-  this.strokeSize = strokeSize;
-  this.anchor = anchor;
-  this.zOrder = zOrder;
-
   const label = new cc.LabelTTF(
     text,
     fontName,
@@ -101,6 +84,23 @@ const createLabel = ({
   setStrokeTextStyles(label, strokeSize, strokeColor);
   setLabel(label, anchor, position);
   addLabel(label, parent, zOrder);
+
+  label.parent = parent;
+  label.text = text;
+  label.opacity = opacity;
+  label.fontName = fontName;
+  label.fontSize = fontSize;
+  label.dimensions = dimensions;
+  label.horizontalAlign = horizontalAlign;
+  label.verticalAlign = verticalAlign;
+  label.fontWeight = fontWeight;
+  label.fontStyle = fontStyle;
+  label.position = position;
+  label.color = color;
+  label.strokeColor = strokeColor;
+  label.strokeSize = strokeSize;
+  label.anchor = anchor;
+  label.zOrder = zOrder;
 
   return label;
 };
