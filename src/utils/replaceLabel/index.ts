@@ -9,6 +9,8 @@ export const replaceLabel = (newParent, label, newText) => {
     fontName,
     fontSize,
     dimensions,
+    horizontalAlign,
+    verticalAlign,
     fontWeight,
     fontStyle,
     position,
@@ -37,6 +39,10 @@ export const replaceLabel = (newParent, label, newText) => {
     fontWeight,
     'file: index.ts ~ line 21 ~ dimensions',
     dimensions,
+    'file: index.ts ~ line 21 ~ horizontalAlign',
+    horizontalAlign,
+    'file: index.ts ~ line 21 ~ verticalAlign',
+    verticalAlign,
     'file: index.ts ~ line 21 ~ fontSize',
     fontSize,
     'file: index.ts ~ line 21 ~ fontName',
@@ -48,18 +54,6 @@ export const replaceLabel = (newParent, label, newText) => {
   const newLabel = createLabel({
     parent: newParent,
     text: newText,
-    opacity,
-    fontName,
-    fontSize,
-    dimensions,
-    fontWeight,
-    fontStyle,
-    position,
-    color,
-    strokeColor,
-    strokeSize,
-    anchor,
-    zOrder,
   });
   label.removeFromParent();
   return newLabel;
