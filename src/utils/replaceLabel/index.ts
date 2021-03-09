@@ -23,7 +23,7 @@ export const replaceLabel = (newParent, label, newText) => {
     propZOrder,
   } = label;
   console.log(
-    'file: index.ts ~ line 25 ~ props',
+    'PROPS',
     propText,
     propOpacity,
     propFontName,
