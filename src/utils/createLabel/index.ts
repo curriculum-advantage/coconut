@@ -85,22 +85,22 @@ const createLabel = ({
   setLabel(label, anchor, position);
   addLabel(label, parent, zOrder);
 
-  label.parent = parent;
-  label.text = text;
-  label.opacity = opacity;
-  label.fontName = fontName;
-  label.fontSize = fontSize;
-  label.dimensions = dimensions;
-  label.horizontalAlign = horizontalAlign;
-  label.verticalAlign = verticalAlign;
-  label.fontWeight = fontWeight;
-  label.fontStyle = fontStyle;
-  label.position = position;
-  label.color = color;
-  label.strokeColor = strokeColor;
-  label.strokeSize = strokeSize;
-  label.anchor = anchor;
-  label.zOrder = zOrder;
+  label.propParent = parent;
+  label.propText = text;
+  label.propOpacity = opacity;
+  label.propFontName = fontName;
+  label.propFontSize = fontSize;
+  label.propDimensions = dimensions;
+  label.propHorizontalAlign = horizontalAlign;
+  label.propVerticalAlign = verticalAlign;
+  label.propFontWeight = fontWeight;
+  label.propFontStyle = fontStyle;
+  label.propPosition = position;
+  label.propColor = color;
+  label.propStrokeColor = strokeColor;
+  label.propStrokeSize = strokeSize;
+  label.propAnchor = anchor;
+  label.propZOrder = zOrder;
 
   return label;
 };
