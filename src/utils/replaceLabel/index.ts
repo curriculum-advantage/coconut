@@ -24,6 +24,7 @@ export const replaceLabel = (newParent, label, newText) => {
   } = label;
   console.log(
     'PROPS',
+    propParent,
     propText,
     propOpacity,
     propFontName,
