@@ -45,6 +45,20 @@ export const replaceLabel = (newParent, label, newText) => {
   const newLabel = createLabel({
     parent: newParent,
     text: newText,
+    opacity: propOpacity,
+    fontName: propFontName,
+    fontSize: propFontSize,
+    dimensions: propDimensions,
+    horizontalAlign: propHorizontalAlign,
+    verticalAlign: propVerticalAlign,
+    fontWeight: propFontWeight,
+    fontStyle: propFontStyle,
+    position: propPosition,
+    color: propColor,
+    strokeColor: propStrokeColor,
+    strokeSize: propStrokeSize,
+    anchor: propAnchor,
+    zOrder: propZOrder,
   });
   label.removeFromParent();
   return newLabel;
