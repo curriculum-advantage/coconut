@@ -35,22 +35,22 @@ class MultiLabel extends cc.LayerColor {
     this.setContentSize(containerWidth, containerHeight);
     this.setPosition(...position);
 
-    this.anchor = anchor;
-    this.areaClick = areaClick;
-    this.clickHandler = clickHandler;
-    this.containerWidth = containerWidth;
-    this.containerHeight = containerHeight;
-    this.defaultFillIn = defaultFillIn;
-    this.fontColorHighlight = fontColorHighlight;
-    this.fontColorPrimary = fontColorPrimary;
-    this.fontSize = fontSize;
-    this.fontStyle = fontStyle;
-    this.fontWeight = fontWeight;
-    this.horizontalAlignment = horizontalAlignment;
-    this.lineHeight = lineHeight;
-    this.position = position;
-    this.wordSpace = wordSpace;
-    this.defaultText = defaultText;
+    // this.anchor = anchor;
+    // this.areaClick = areaClick;
+    // this.clickHandler = clickHandler;
+    // this.containerWidth = containerWidth;
+    // this.containerHeight = containerHeight;
+    // this.defaultFillIn = defaultFillIn;
+    // this.fontColorHighlight = fontColorHighlight;
+    // this.fontColorPrimary = fontColorPrimary;
+    // this.fontSize = fontSize;
+    // this.fontStyle = fontStyle;
+    // this.fontWeight = fontWeight;
+    // this.horizontalAlignment = horizontalAlignment;
+    // this.lineHeight = lineHeight;
+    // this.position = position;
+    // this.wordSpace = wordSpace;
+    // this.defaultText = defaultText;
 
     let displayedText;
     let numberReplacedFillIns = 0;
