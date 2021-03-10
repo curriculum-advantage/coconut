@@ -8,9 +8,7 @@ export const textAlignment = (
   isVertical: boolean,
   position: VerticalAlignment | HorizontalAlignment,
 ) => {
-  console.log('TOUPPERCASEPROBLEM', position);
   const prefix = isVertical ? 'VERTICAL_' : '';
-  console.log('file: index.ts ~ line 13 ~ prefix', prefix);
   return cc[`${prefix}TEXT_ALIGNMENT_${position.toUpperCase()}`];
 };
 
