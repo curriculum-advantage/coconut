@@ -102,7 +102,9 @@ const createLabel = ({
   label.propAnchor = anchor;
   label.propZOrder = zOrder;
 
-  return label;
+  setTimeout(() => {
+    return label;
+  }, 1000);
 };
 
 export default createLabel;
