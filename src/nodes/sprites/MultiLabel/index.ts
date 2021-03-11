@@ -304,7 +304,8 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color) =>
+    const createTextLabel = (labelText, labelWeight, labelStyle, color) => {
+      // setTimeout(() => {
       createLabel({
         parent: this,
         text: labelText,
@@ -315,6 +316,8 @@ class MultiLabel extends cc.LayerColor {
         position: [0, 0],
         color,
       });
+      // }, 115);
+    };
 
     /**
      * Convert Fraction labeled text into fraction
@@ -361,9 +364,9 @@ class MultiLabel extends cc.LayerColor {
         ? getFractionLabel(labelText, color)
         : createTextLabel(labelText, styleFontWeight, styleFontStyle, color);
 
-      if (textLabel.setDimensions) {
-        const { width, height } = textLabel.getContentSize();
-        textLabel.setDimensions(width, height + 2);
+      if (textLabel && textLabel?.setDimensions) {
+        const { width, height } = textLabel?.getContentSize();
+        textLabel?.setDimensions(width, height + 2);
       }
       return { styleFontStyle, color, textLabel };
     };

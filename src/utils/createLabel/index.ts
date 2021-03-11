@@ -104,7 +104,7 @@ const createLabel = ({
 
   setTimeout(() => {
     return label;
-  }, 1000);
+  }, 100);
 };
 
 export default createLabel;
