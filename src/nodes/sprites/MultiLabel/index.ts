@@ -508,6 +508,7 @@ class MultiLabel extends cc.LayerColor {
     };
 
     const render = (text = displayedText): void => {
+      this.setVisible(false);
       reset();
 
       const promises = text.split(' ').map(createSpriteLabel);
@@ -518,6 +519,7 @@ class MultiLabel extends cc.LayerColor {
         if (horizontalAlignment !== 'left') setHorizontalPosition();
         reposition();
         addAndPositionDrawingMarkup();
+        this.setVisible(true);
         return null;
       }).catch(() => null);
     };
