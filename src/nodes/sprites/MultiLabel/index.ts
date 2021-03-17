@@ -1,8 +1,15 @@
 // TODO: This file needs heavy cleanup for lint and type errors. Remove all @ts-ignore in file.
 
-import { escapeRegExp, findKey, values as ObjectValues } from 'lodash';
+import {
+  escapeRegExp,
+  findKey,
+  values as ObjectValues,
+} from 'lodash';
 import { detect } from 'detect-browser';
-import { sub, sup } from './helpers/superSubScripts';
+import {
+  sub,
+  sup,
+} from './helpers/superSubScripts';
 import createLabel from '../../../utils/createLabel';
 import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
@@ -72,7 +79,7 @@ class MultiLabel extends cc.LayerColor {
       shiftUpSyntax: '[SHIFTUP]',
     };
 
-    const updateRangeValues = (unStyledText, syntax) => {
+    const updateRangeValues = (unStyledText, syntax): string => {
       let updateText = unStyledText;
       const endSyntax = syntax.replace('[', '[/');
       const splitString = unStyledText.split(' ');
@@ -113,7 +120,7 @@ class MultiLabel extends cc.LayerColor {
      * @param {string} unmarkText the text to be marked up for styling prior to rendering
      * @returns {string} the marked up text to be styled prior to rendering
      */
-    const notateStyles = (unmarkText) => {
+    const notateStyles = (unmarkText): string => {
       let updatedText = unmarkText;
       ObjectValues(styleSyntaxes).forEach((syntax) => {
         if (updatedText.includes(syntax)) {
@@ -132,7 +139,7 @@ class MultiLabel extends cc.LayerColor {
      * @param {string} markText the marked up text to check.
      * @returns {object} an objected containing all the styling to be applied to the marked up text.
      */
-    const getStyling = (markText) => {
+    const getStyling = (markText): object => {
       const styles = {};
       ObjectValues(styleSyntaxes).forEach((syntax) => {
         if (markText.includes(syntax)) {
@@ -147,7 +154,7 @@ class MultiLabel extends cc.LayerColor {
      * @param markText the string with all the marking for the supported styling.
      * @returns {string} the string without the styling markup
      */
-    const cleanText = (markText) => {
+    const cleanText = (markText): string => {
       let cleanedText = markText;
       ObjectValues(styleSyntaxes).forEach((syntax) => {
         if (syntax === '[BLANK]' && cleanedText.includes(syntax)) {
@@ -165,7 +172,7 @@ class MultiLabel extends cc.LayerColor {
       return cleanedText;
     };
 
-    const breakLine = () => {
+    const breakLine = (): void => {
       positionX = 0;
       if (offsetForFraction) {
         currentLine.forEach((label) => label.setPositionY(label.getPositionY() - (lineOffset / 2)));
@@ -176,7 +183,7 @@ class MultiLabel extends cc.LayerColor {
       offsetForFraction = false;
     };
 
-    const concat = (label, changeY = true) => {
+    const concat = (label, changeY = true): void => {
       const previousLabel = currentLine.length > 0
         ? currentLine[currentLine.length - 1]
         : labels[labels.length - 1];
@@ -200,14 +207,14 @@ class MultiLabel extends cc.LayerColor {
       if (changeY) label.setPositionY(positionY);
     };
 
-    const shouldBreakLine = (width, hasLinebreak) => positionX + width > containerWidth
+    const shouldBreakLine = (width, hasLinebreak): boolean => positionX + width > containerWidth
       || hasLinebreak;
 
-    const checkWidth = (width, hasLinebreak) => {
+    const checkWidth = (width, hasLinebreak): void => {
       if (shouldBreakLine(width, hasLinebreak)) breakLine();
     };
 
-    const offsetForScript = (label, hasSubscript, hasSuperScript) => {
+    const offsetForScript = (label, hasSubscript, hasSuperScript): boolean => {
       const shouldUpdateFontSize = hasSubscript || hasSuperScript;
       if (shouldUpdateFontSize) {
         label.setFontSize(fontSize * 0.6);
@@ -228,7 +235,7 @@ class MultiLabel extends cc.LayerColor {
      * @param shouldShiftUp flag for whether the label should be shifted up
      * @param shouldShiftDown flag for whether the label should be shifed down
      */
-    const shift = (label, shouldShiftUp, shouldShiftDown) => {
+    const shift = (label, shouldShiftUp, shouldShiftDown): void => {
       previousWasShift = false;
       if (shouldShiftUp || shouldShiftDown) {
         const shiftDirection = shouldShiftUp ? 1 : -1;
@@ -238,7 +245,7 @@ class MultiLabel extends cc.LayerColor {
       }
     };
 
-    const shouldOffsetBold = (bold) => bold && browser
+    const shouldOffsetBold = (bold): boolean => bold && browser
       && (browser.name === 'ie' || browser.name === 'edge');
 
     /**
@@ -247,7 +254,7 @@ class MultiLabel extends cc.LayerColor {
      * @param {cc.LabelTTF} label the label to be position
      * @param {object} styling object containing the label styling.
      */
-    const setDefaultPosition = (label, styling) => {
+    const setDefaultPosition = (label, styling): void => {
       const { width } = label;
       checkWidth(width, styling.breakSyntax);
       if (styling.concatSyntax) concat(label);
@@ -266,7 +273,7 @@ class MultiLabel extends cc.LayerColor {
       positionX += width + wordOffset;
     };
 
-    const formatSuperSubScript = (text) => {
+    const formatSuperSubScript = (text): string => {
       let updatedText = text;
       if (updatedText.includes('[SUBSCRIPT]') || updatedText.includes('[SUPERSCRIPT]')) {
         const syntax = updatedText.includes('[SUBSCRIPT]') ? '[SUBSCRIPT]' : '[SUPERSCRIPT]';
@@ -285,7 +292,7 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color) => createLabel({
+    const createTextLabel = (labelText, labelWeight, labelStyle, color): Promise<typeof cc.Sprite> => createLabel({
       parent: this,
       text: labelText,
       fontSize,
@@ -303,7 +310,7 @@ class MultiLabel extends cc.LayerColor {
      * @param color the color of the fraction
      * @returns {Fraction}
      */
-    const getFractionLabel = (text, color) => {
+    const getFractionLabel = (text, color): typeof cc.Sprite => {
       let fraction;
       let fText = text.replace(new RegExp('_', 'g'), ' ').split('|');
       fText = fText.map((value) => formatSuperSubScript(value));
@@ -318,7 +325,7 @@ class MultiLabel extends cc.LayerColor {
       return fractionLabel;
     };
 
-    const getOtherDrawSyntaxes = (styling = {}) => {
+    const getOtherDrawSyntaxes = (styling = {}): object => {
       const additionalSyntaxes = {};
       Object.getOwnPropertyNames(otherSyntaxes).forEach((syntax) => {
         additionalSyntaxes[syntax.replace('Syntax', '')] = styling[syntax];
@@ -327,32 +334,45 @@ class MultiLabel extends cc.LayerColor {
       return additionalSyntaxes;
     };
 
-    const checkForChildLevelSyntax = (drawObject, styling) => {
+    const checkForChildLevelSyntax = (drawObject, styling): void => {
       if (hasOtherSyntaxes) Object.assign(drawObject, getOtherDrawSyntaxes(styling));
     };
 
-    const createStyledLabel = async (styling, text) => {
+    const createBaseSprite = async (styling, text): Promise<object> => {
       const styleFontWeight = styling.boldSyntax ? 900 : fontWeight;
       const styleFontStyle = styling.italicSyntax ? 'italic' : fontStyle;
       const color = styling.highlightSyntax ? fontColorHighlight : fontColorPrimary;
       let labelText = formatSuperSubScript(text);
       labelText = styling.blankSyntax ? labelText : labelText.replace(/_/g, ' ');
-      const textLabel = styling.fractionSyntax
+      return styling.fractionSyntax
         ? getFractionLabel(labelText, color)
-        : await createTextLabel(labelText, styleFontWeight, styleFontStyle, color);
+        : {
+          textLabel: await createTextLabel(labelText, styleFontWeight, styleFontStyle, color),
+          styleFontStyle,
+          color,
+          styling,
+        };
+    };
+
+    const createSpriteLabel = (text): Promise<object> => {
+      const styling = getStyling(text);
+      const updatedText = cleanText(text);
+
+      return createBaseSprite(styling, updatedText);
+    };
+
+    const styleTextSprite = (stylingObject) => {
+      const {
+        styleFontStyle,
+        color,
+        textLabel,
+        styling,
+      } = stylingObject;
 
       if (textLabel.setDimensions) {
         const { width, height } = textLabel.getContentSize();
         textLabel.setDimensions(width, height + 2);
       }
-      return { styleFontStyle, color, textLabel };
-    };
-
-    const createAndAddLabel = async (text) => {
-      const styling = getStyling(text);
-      const updatedText = cleanText(text);
-
-      const { styleFontStyle, color, textLabel } = await createStyledLabel(styling, updatedText);
 
       const drawObject = {
         // @ts-ignore
@@ -365,22 +385,23 @@ class MultiLabel extends cc.LayerColor {
 
       setDefaultPosition(textLabel, styling);
       labels.push(textLabel);
-      return null;
     };
 
-    const setHorizontalPosition = () => {
+    const setHorizontalPosition = (): void => {
       lines.forEach((line) => {
-        const lastWordInLine = line[line.length - 1];
-        const { width, x } = lastWordInLine.getBoundingBox();
-        const offset = (containerWidth - (x + width)) / (horizontalAlignment === 'center' ? 2 : 1);
+        if (line.length > 0) {
+          const lastWordInLine = line[line.length - 1];
+          const { width, x } = lastWordInLine.getBoundingBox();
+          const offset = (containerWidth - (x + width)) / (horizontalAlignment === 'center' ? 2 : 1);
 
-        line.forEach((word) => {
-          word.setPositionX(word.getPositionX() + offset);
-        });
+          line.forEach((word) => {
+            word.setPositionX(word.getPositionX() + offset);
+          });
+        }
       });
     };
 
-    const addListener = () => {
+    const addListener = (): void => {
       cc.eventManager.addListener({
         event: cc.EventListener.TOUCH_ONE_BY_ONE,
         swallowTouches: false,
@@ -405,13 +426,13 @@ class MultiLabel extends cc.LayerColor {
     };
 
     // create default blank underscore strings for every fill-in-blank formatting syntax found
-    const initiateFillIns = (text) => {
+    const initiateFillIns = (text): void => {
       const regExp = new RegExp(escapeRegExp(styleSyntaxes.blankSyntax), 'g');
       const fillInCount = (text.match(regExp) || []).length;
       fillIns = new Array(fillInCount).fill(defaultFillIn);
     };
 
-    const reset = () => {
+    const reset = (): void => {
       positionX = 0;
       numberReplacedFillIns = 0;
       positionY = containerHeight - lineOffset - 5;
@@ -438,7 +459,7 @@ class MultiLabel extends cc.LayerColor {
      *
      * @param {array} color the color of the text decoration.
      */
-    const underlineLabel = ({ x, y, width }, color) => {
+    const underlineLabel = ({ x, y, width }, color): void => {
       let yOffset = 3;
       if (browser.name === 'ie' || browser.name === 'edge') yOffset = 0;
       const underline = createRect({
@@ -455,7 +476,7 @@ class MultiLabel extends cc.LayerColor {
      * Called after the adjusting the labels positioning. Draw the marked syntaxes in the proper
      * locations.
      */
-    const addAndPositionDrawingMarkup = () => {
+    const addAndPositionDrawingMarkup = (): void => {
       drawingSyntaxes.forEach((drawingSyntax, index) => {
         if (drawingSyntax.underline) {
           underlineLabel(labels[index].getBoundingBox(), drawingSyntax.color);
@@ -471,7 +492,7 @@ class MultiLabel extends cc.LayerColor {
       });
     };
 
-    const reposition = () => {
+    const reposition = (): void => {
       const actualHeight = containerHeight + (-1 * positionY);
       this.setContentSize(containerWidth, actualHeight);
       const changeInHeight = (actualHeight - containerHeight);
@@ -486,50 +507,51 @@ class MultiLabel extends cc.LayerColor {
       this.setPositionY(position[1] - changeInHeight);
     };
 
-    const render = async (text = displayedText) => {
+    const render = (text = displayedText): void => {
       reset();
-      const renderPromises = [];
-      text.split(' ').forEach((string) => renderPromises.push(createAndAddLabel(string)));
-      await Promise.all(renderPromises);
-      lines.push(currentLine.slice());
-      currentLine = [];
-      if (horizontalAlignment !== 'left') setHorizontalPosition();
-      reposition();
-      addAndPositionDrawingMarkup();
-      return null;
+
+      const promises = text.split(' ').map(createSpriteLabel);
+      Promise.all(promises).then((result) => {
+        result.forEach(styleTextSprite);
+        lines.push(currentLine.slice());
+        currentLine = [];
+        if (horizontalAlignment !== 'left') setHorizontalPosition();
+        reposition();
+        addAndPositionDrawingMarkup();
+        return null;
+      }).catch(() => null);
     };
 
-    this.setString = async (text) => {
+    this.setString = (text): void => {
       displayedText = text;
       const updatedText = notateStyles(text);
       initiateFillIns(displayedText);
-      await render(updatedText);
+      render(updatedText);
       addListener();
-      return null;
     };
 
     /**
      * Display a white solid background unless otherwise specified
      */
-    this.showBackground = () => {
+    this.showBackground = (): void => {
       this.setOpacity(255);
     };
 
-    this.fillInBlank = async (index, fillInText) => {
+    this.fillInBlank = (index, fillInText): void => {
       fillIns[index] = fillInText;
-      await render();
+      render();
     };
 
-    this.resetBlank = async (index) => {
+    this.resetBlank = (index): void => {
       fillIns[index] = defaultFillIn;
-      await render();
+      render();
     };
 
-    this.getLabels = () => labels;
+    this.getLabels = (): Array<typeof cc.Sprite> => labels;
 
-    this.wasClicked = () => wasClicked;
+    this.wasClicked = (): boolean => wasClicked;
 
-    this.resetClicked = () => {
+    this.resetClicked = (): void => {
       wasClicked = false;
     };
   }
