@@ -139,11 +139,9 @@ class TextImage extends cc.Sprite {
     zOrder: number): void => {
     this.#getCanvas(textElement).then((canvas) => {
       textElement.remove();
-      document.body.append(canvas);
 
       const id = Guid.generate();
       cc.textureCache.cacheImage(id, canvas);
-      canvas.remove();
 
       this.#createTextSprite(cc.textureCache.getTextureForKey(id), parent, zOrder);
       return null;
