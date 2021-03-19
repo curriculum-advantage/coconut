@@ -1,10 +1,10 @@
 // TODO: This file needs heavy cleanup for lint errors.
 
-import createLabel from '../../../utils/createLabel';
 import createRect from '../../../utils/createRect';
 import { containsSuperScript } from '../MultiLabel/helpers/superSubScripts';
+import TextImage from '../TextImage';
 
-const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
+const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 
 class Fraction extends cc.Node {
   constructor({
@@ -28,19 +28,19 @@ class Fraction extends cc.Node {
       this.setContentSize(width, height);
     };
 
-    const addNumberLabel = (text, position) => createLabel({
+    const addNumberLabel = (text, position): typeof cc.Sprite => new TextImage({
       parent: this,
       text,
       color,
       position,
       fontSize: adjustedFontSize,
       anchor: [0, 0],
-      verticalAlign: containsSuperScript(text) ? 'bottom' : 'top',
+      verticalAlign: containsSuperScript(text) ? 'end' : 'normal',
     });
 
-    const setWholeNumber = () => addNumberLabel(whole, [0, 0]);
+    const setWholeNumber = (): typeof cc.Sprite => addNumberLabel(whole, [0, 0]);
 
-    const setNumerator = pipeObject => {
+    const setNumerator = (pipeObject): typeof cc.Sprite => {
       const {
         width: pipeObjectWidth,
         height: pipeObjectHeight,
@@ -55,7 +55,7 @@ class Fraction extends cc.Node {
       return addNumberLabel(numerator, [xPosition, yPosition]);
     };
 
-    const setDenominator = pipeObject => {
+    const setDenominator = (pipeObject): object => {
       const {
         x,
         y,
@@ -70,7 +70,7 @@ class Fraction extends cc.Node {
       };
     };
 
-    const repositionX = pipeObject => {
+    const repositionX = (pipeObject): object => {
       const { numeratorLabel, denominatorLabel } = pipeObject;
       const numeratorWidth = numeratorLabel.getBoundingBox().width;
       const denominatorWidth = denominatorLabel.getBoundingBox().width;
@@ -129,7 +129,7 @@ class Fraction extends cc.Node {
       from,
       numeratorLabel,
       denominatorLabel,
-    }) => {
+    }): object => {
       const offsetFrom = whole === '' ? -(wholeNumberOffset + 0.5) : 0;
       const actualWidth = from + to + offsetFrom;
       const { height: numeratorHeight } = numeratorLabel.getBoundingBox();
@@ -141,18 +141,18 @@ class Fraction extends cc.Node {
       if (offsetFrom !== 0) {
         const changeInX = Math.abs(0 - from);
         this.getChildren()
-          .forEach(child => child.setPositionX(child.getBoundingBox().x - changeInX));
+          .forEach((child) => child.setPositionX(child.getBoundingBox().x - changeInX));
       }
       return { actualHeight, numeratorLabel };
     };
 
-    const repositionY = pipeObject => {
+    const repositionY = (pipeObject): void => {
       const { y, height: pipeObjectHeight } = pipeObject.numeratorLabel.getBoundingBox();
       const changeInY = pipeObject.actualHeight - Math.abs(0 - y - pipeObjectHeight);
-      this.getChildren().forEach(child => child.setPositionY(child.getBoundingBox().y + changeInY));
+      this.getChildren().forEach((child) => child.setPositionY(child.getBoundingBox().y + changeInY));
     };
 
-    (() => {
+    ((): void => {
       // @ts-ignore
       pipe(
         setWholeNumber,

@@ -1,6 +1,6 @@
 import { range } from 'lodash';
-import createLabel from '../createLabel';
 import { primaryFont } from '../../lib/constants';
+import TextImage from '../../nodes/sprites/TextImage';
 
 /*
  * TODO: Underline, background colors, placeholders (fill in blank), vertical text
@@ -94,7 +94,7 @@ class Paragraph extends cc.Node {
   }
 
   removeLabels() {
-    this.paragraphLabels.forEach(label => label.removeFromParent());
+    this.paragraphLabels.forEach((label) => label.removeFromParent());
   }
 
   nextCharLabelPos() {
@@ -145,7 +145,7 @@ class Paragraph extends cc.Node {
       fontName = this.fontName,
     } = {},
   ) {
-    const label = createLabel({
+    const label = new TextImage({
       parent: this.currentWordNode,
       text,
       color,
@@ -166,7 +166,7 @@ class Paragraph extends cc.Node {
     this.currentWordNode.setPosition(...position);
     this.addChild(this.currentWordNode);
     this.currentWordNode = new cc.Node();
-    this.charLabels.forEach(charLabel => this.paragraphLabels.push(charLabel));
+    this.charLabels.forEach((charLabel) => this.paragraphLabels.push(charLabel));
     this.charLabels = [];
   }
 
@@ -228,7 +228,7 @@ class Paragraph extends cc.Node {
       const index = this.parsedText.indexOf(char, currentIndex);
 
       // Find any formatting settings that belong to this character.
-      const formattedSubstring = this.formattedSubstrings.find(format => {
+      const formattedSubstring = this.formattedSubstrings.find((format) => {
         const [start, end] = format.indexRange;
         return range(start, end).includes(index);
       }) || {};

@@ -10,10 +10,10 @@ import {
   sub,
   sup,
 } from './helpers/superSubScripts';
-import createLabel from '../../../utils/createLabel';
 import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
 import Fraction from '../Fraction';
+import TextImage from '../TextImage';
 
 class MultiLabel extends cc.LayerColor {
   constructor({
@@ -292,7 +292,7 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color): Promise<typeof cc.Sprite> => createLabel({
+    const createTextLabel = (labelText, labelWeight, labelStyle, color): typeof cc.Sprite => new TextImage({
       parent: this,
       text: labelText,
       fontSize,
@@ -310,7 +310,7 @@ class MultiLabel extends cc.LayerColor {
      * @param color the color of the fraction
      * @returns {Fraction}
      */
-    const getFractionLabel = (text, color): typeof cc.Sprite => {
+    const getFractionLabel = (text, color): typeof cc.Node => {
       let fraction;
       let fText = text.replace(new RegExp('_', 'g'), ' ').split('|');
       fText = fText.map((value) => formatSuperSubScript(value));
@@ -338,41 +338,29 @@ class MultiLabel extends cc.LayerColor {
       if (hasOtherSyntaxes) Object.assign(drawObject, getOtherDrawSyntaxes(styling));
     };
 
-    const createBaseSprite = async (styling, text): Promise<object> => {
+    const createStyledLabel = (styling, text): object => {
       const styleFontWeight = styling.boldSyntax ? 900 : fontWeight;
       const styleFontStyle = styling.italicSyntax ? 'italic' : fontStyle;
       const color = styling.highlightSyntax ? fontColorHighlight : fontColorPrimary;
       let labelText = formatSuperSubScript(text);
       labelText = styling.blankSyntax ? labelText : labelText.replace(/_/g, ' ');
-      return styling.fractionSyntax
+      const textLabel = styling.fractionSyntax
         ? getFractionLabel(labelText, color)
-        : {
-          textLabel: await createTextLabel(labelText, styleFontWeight, styleFontStyle, color),
-          styleFontStyle,
-          color,
-          styling,
-        };
-    };
-
-    const createSpriteLabel = (text): Promise<object> => {
-      const styling = getStyling(text);
-      const updatedText = cleanText(text);
-
-      return createBaseSprite(styling, updatedText);
-    };
-
-    const styleTextSprite = (stylingObject) => {
-      const {
-        styleFontStyle,
-        color,
-        textLabel,
-        styling,
-      } = stylingObject;
+        : createTextLabel(labelText, styleFontWeight, styleFontStyle, color);
 
       if (textLabel.setDimensions) {
         const { width, height } = textLabel.getContentSize();
         textLabel.setDimensions(width, height + 2);
       }
+      return { styleFontStyle, color, textLabel };
+    };
+
+    const createAndAddLabel = (text) => {
+      const styling = getStyling(text);
+      const updatedText = cleanText(text);
+
+      // @ts-ignore
+      const { styleFontStyle, color, textLabel } = createStyledLabel(styling, updatedText);
 
       const drawObject = {
         // @ts-ignore
@@ -389,15 +377,13 @@ class MultiLabel extends cc.LayerColor {
 
     const setHorizontalPosition = (): void => {
       lines.forEach((line) => {
-        if (line.length > 0) {
-          const lastWordInLine = line[line.length - 1];
-          const { width, x } = lastWordInLine.getBoundingBox();
-          const offset = (containerWidth - (x + width)) / (horizontalAlignment === 'center' ? 2 : 1);
+        const lastWordInLine = line[line.length - 1];
+        const { width, x } = lastWordInLine.getBoundingBox();
+        const offset = (containerWidth - (x + width)) / (horizontalAlignment === 'center' ? 2 : 1);
 
-          line.forEach((word) => {
-            word.setPositionX(word.getPositionX() + offset);
-          });
-        }
+        line.forEach((word) => {
+          word.setPositionX(word.getPositionX() + offset);
+        });
       });
     };
 
@@ -508,20 +494,13 @@ class MultiLabel extends cc.LayerColor {
     };
 
     const render = (text = displayedText): void => {
-      this.setVisible(false);
       reset();
-
-      const promises = text.split(' ').map(createSpriteLabel);
-      Promise.all(promises).then((result) => {
-        result.forEach(styleTextSprite);
-        lines.push(currentLine.slice());
-        currentLine = [];
-        if (horizontalAlignment !== 'left') setHorizontalPosition();
-        reposition();
-        addAndPositionDrawingMarkup();
-        this.setVisible(true);
-        return null;
-      }).catch(() => null);
+      text.split(' ').forEach((string) => createAndAddLabel(string));
+      lines.push(currentLine.slice());
+      currentLine = [];
+      if (horizontalAlignment !== 'left') setHorizontalPosition();
+      reposition();
+      addAndPositionDrawingMarkup();
     };
 
     this.setString = (text): void => {

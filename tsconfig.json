@@ -16,7 +16,7 @@
     "outDir": "dist/",
 
     // Modern browser support.
-    "target": "es5",
+    "target": "es6",
 
     /* Additional lint rules */
 

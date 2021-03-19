@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { isPlainObject } from 'lodash';
 
 import getCachedFrame from '../getCachedFrame';
@@ -5,7 +6,7 @@ import getCachedFrame from '../getCachedFrame';
 /**
  * Formats the file number to include preceding zeros
  */
-const fileNumber = (number, placeCount) => {
+const fileNumber = (number, placeCount): number => {
   const additionalZeroCount = placeCount - `${number}`.length;
   if (additionalZeroCount > 0) {
     const zeros = new Array(additionalZeroCount).fill(0).join('');
@@ -58,17 +59,15 @@ type FrameSet = [number, string, number?, number?, number[]?];
 // confused by it. This would require the first frameSet argument to be wrapped in an additional
 // array, but that seems like a small price to pay for a cleaner function. Example signature:
 // const frameAnimation = (frameSets: FrameSet[], frameSettings?: FrameOptions = {})
-const frameAnimation = (firstArgument: FrameOptions | FrameSet, ...rest: FrameSet[]) => {
+const frameAnimation = (firstArgument: FrameOptions | FrameSet, ...rest: FrameSet[]): array => {
   const optionsSupplied = isPlainObject(firstArgument);
   const frameSettings = optionsSupplied ? firstArgument : {};
-  // @ts-ignore
   const { delay = 0.111, loops = 1 } = frameSettings;
   const frameSets = optionsSupplied ? rest : [firstArgument, ...rest];
 
   const frames = frameSets.reduce(
     (
       accumulator,
-      // @ts-ignore
       [
         frameNumberEnd,
         staticFilePath,
