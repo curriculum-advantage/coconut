@@ -12,7 +12,6 @@ import {
 } from './helpers/superSubScripts';
 import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
-import Fraction from '../Fraction';
 import TextImage from '../TextImage';
 
 class MultiLabel extends cc.LayerColor {
@@ -55,7 +54,6 @@ class MultiLabel extends cc.LayerColor {
     const otherSyntaxes = hasOtherSyntaxes && objectParameters.styleSyntaxes
       ? objectParameters.styleSyntaxes
       : {};
-    let offsetForFraction = false;
     let previousWasShift = false;
 
     let wasClicked = false;
@@ -174,13 +172,9 @@ class MultiLabel extends cc.LayerColor {
 
     const breakLine = (): void => {
       positionX = 0;
-      if (offsetForFraction) {
-        currentLine.forEach((label) => label.setPositionY(label.getPositionY() - (lineOffset / 2)));
-      }
-      positionY -= (lineOffset + (offsetForFraction ? lineOffset : 0));
+      positionY -= lineOffset;
       lines.push(currentLine.slice());
       currentLine = [];
-      offsetForFraction = false;
     };
 
     const concat = (label, changeY = true): void => {
@@ -292,10 +286,11 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color): typeof cc.Sprite => new TextImage({
+    const createTextLabel = (labelText, labelWeight, labelStyle, color, display = 'flex'): typeof cc.Sprite => new TextImage({
       parent: this,
       text: labelText,
       fontSize,
+      display,
       fontWeight: labelWeight,
       fontStyle: labelStyle,
       anchor: [0, 0],
@@ -308,21 +303,17 @@ class MultiLabel extends cc.LayerColor {
      * '_' is used as space marker
      * @param text the Fraction text
      * @param color the color of the fraction
-     * @returns {Fraction}
+     * @returns {TextImage}
      */
-    const getFractionLabel = (text, color): typeof cc.Node => {
+    const getFractionLabel = (text, styleFontWeight, styleFontStyle, color): typeof cc.Node => {
       let fraction;
       let fText = text.replace(new RegExp('_', 'g'), ' ').split('|');
       fText = fText.map((value) => formatSuperSubScript(value));
       if (fText.length === 3) {
-        fraction = { whole: fText[0], numerator: fText[1], denominator: fText[2] };
-      } else fraction = { numerator: fText[0], denominator: fText[1] };
-      fraction = { ...fraction, fontSize, color };
+        fraction = `${fText[0]}<sup>${fText[1]}</sup>&frasl;<sub>${fText[2]}</sub>`;
+      } else fraction = `<sup>${fText[0]}</sup>&frasl;<sub>${fText[1]}</sub>`;
 
-      const fractionLabel = new Fraction(fraction);
-      this.addChild(fractionLabel);
-      offsetForFraction = true;
-      return fractionLabel;
+      return createTextLabel(fraction, styleFontWeight, styleFontStyle, color, 'block');
     };
 
     const getOtherDrawSyntaxes = (styling = {}): object => {
@@ -345,7 +336,7 @@ class MultiLabel extends cc.LayerColor {
       let labelText = formatSuperSubScript(text);
       labelText = styling.blankSyntax ? labelText : labelText.replace(/_/g, ' ');
       const textLabel = styling.fractionSyntax
-        ? getFractionLabel(labelText, color)
+        ? getFractionLabel(labelText, styleFontWeight, styleFontStyle, color)
         : createTextLabel(labelText, styleFontWeight, styleFontStyle, color);
 
       if (textLabel.setDimensions) {
@@ -422,7 +413,6 @@ class MultiLabel extends cc.LayerColor {
       positionX = 0;
       numberReplacedFillIns = 0;
       positionY = containerHeight - lineOffset - 5;
-      offsetForFraction = false;
       previousWasShift = false;
       labels.forEach((label) => label.removeFromParent());
       symbols.forEach((symbol) => symbol.removeFromParent());

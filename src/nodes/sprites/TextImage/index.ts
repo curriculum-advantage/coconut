@@ -18,6 +18,7 @@ import Guid from '../../../utils/guid/guid';
  * @param options.position Position (relative to `parent`) that the label `anchor` is placed at.
  * @param options.color Color of the displayed text.
  * @param options.strokeColor Stroke color of the displayed text. Requires a `strokeSize` greater
+ * * @param options.display the base dom display behavior
  * than 0.
  * @param options.strokeSize Stroke size of the displayed text.
  * @param options.anchor Anchor point of the label, to be used by `position`. @see
@@ -73,6 +74,8 @@ class TextImage extends cc.Sprite {
 
   readonly #containerHeight;
 
+  readonly #display;
+
   constructor({
     parent = null,
     text = '',
@@ -91,6 +94,7 @@ class TextImage extends cc.Sprite {
     zOrder = 0,
     containerWidth = 0,
     containerHeight = 0,
+    display = 'flex',
   } = {}) {
     super();
     this.setVisible(false);
@@ -111,6 +115,7 @@ class TextImage extends cc.Sprite {
     this.#zOrder = zOrder;
     this.#containerWidth = containerWidth;
     this.#containerHeight = containerHeight;
+    this.#display = display;
     this.setString(text);
     this.#parent.addChild(this, this.#zOrder);
   }
@@ -150,7 +155,7 @@ class TextImage extends cc.Sprite {
     else textElement.style.height = `${this.#containerHeight}px`;
 
     textElement.style.margin = '0 auto';
-    textElement.style.display = 'flex';
+    textElement.style.display = this.#display;
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
 
