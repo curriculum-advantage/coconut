@@ -41,16 +41,48 @@ import Guid from '../../../utils/guid/guid';
  * });
  */
 class TextImage extends cc.Sprite {
+  readonly #zOrder;
+
+  readonly #parent;
+
+  readonly #opacity;
+
+  readonly #fontName;
+
+  readonly #fontSize;
+
+  readonly #horizontalAlign;
+
+  readonly #verticalAlign;
+
+  readonly #fontWeight;
+
+  readonly #fontStyle;
+
+  readonly #position;
+
+  readonly #color;
+
+  readonly #strokeColor;
+
+  readonly #strokeWidth;
+
+  readonly #anchor;
+
+  readonly #containerWidth;
+
+  readonly #containerHeight;
+
   constructor({
     parent = null,
     text = '',
     opacity = 1,
     fontName = primaryFont,
     fontSize = 16,
-    horizontalAlign = 'left' as HorizontalAlignment,
-    verticalAlign = 'top' as VerticalAlignment,
     fontWeight = 400,
     fontStyle = 'normal' as FontStyle,
+    horizontalAlign = 'left' as HorizontalAlignment,
+    verticalAlign = 'top' as VerticalAlignment,
     position = [250, 250] as Point,
     color = [0, 0, 0] as Color,
     strokeColor = [255, 0, 0],
@@ -61,89 +93,79 @@ class TextImage extends cc.Sprite {
     containerHeight = 0,
   } = {}) {
     super();
+    this.setVisible(false);
 
-    // this.setVisible(false);
+    this.#parent = parent;
+    this.#opacity = opacity;
+    this.#fontName = fontName;
+    this.#fontSize = fontSize;
+    this.#fontWeight = fontWeight;
+    this.#fontStyle = fontStyle;
+    this.#horizontalAlign = horizontalAlign;
+    this.#verticalAlign = verticalAlign;
+    this.#position = position;
+    this.#color = color;
+    this.#strokeColor = strokeColor;
+    this.#strokeWidth = strokeWidth;
+    this.#anchor = anchor;
+    this.#zOrder = zOrder;
+    this.#containerWidth = containerWidth;
+    this.#containerHeight = containerHeight;
+    this.setString(text);
+    this.#parent.addChild(this, this.#zOrder);
+  }
 
-    const textElement = this.#generateTextSpan({
-      text,
-      horizontalAlign,
-      verticalAlign,
-      containerWidth,
-      containerHeight,
-      strokeColor,
-      strokeWidth,
-      opacity,
-      fontFamily: fontName,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      color,
-    });
+  setString = (text): void => {
+    const textElement = this.#generateTextSpan(text);
 
     const width = textElement.clientWidth;
     const height = textElement.clientHeight;
 
     this.setContentSize(width, height);
-    this.setPosition(...position);
-    this.setAnchorPoint(...anchor);
+    this.setPosition(...this.#position);
+    this.setAnchorPoint(...this.#anchor);
 
-    this.#generateSprite(textElement, parent, zOrder);
-  }
+    this.#generateSprite(textElement);
+  };
 
-  #generateTextSpan = ({
-    text = '',
-    containerWidth = 0,
-    containerHeight = 0,
-    opacity = 1,
-    fontFamily = primaryFont,
-    fontSize = 16,
-    fontWeight = 400,
-    fontStyle = 'normal' as FontStyle,
-    horizontalAlign = 'left' as HorizontalAlignment,
-    verticalAlign = 'top' as VerticalAlignment,
-    color = [0, 0, 0] as Color,
-    strokeColor = [255, 255, 255],
-    strokeWidth = 0,
-  } = {}): Element => {
+  #generateTextSpan = (text): Element => {
     const textElement = document.createElement('p');
 
     textElement.innerHTML = text;
 
-    textElement.style.fontSize = `${fontSize}px`;
-    textElement.style.fontWeight = String(fontWeight);
-    textElement.style.opacity = String(opacity);
-    textElement.style.fontStyle = fontStyle;
-    textElement.style.fontFamily = fontFamily;
+    textElement.style.fontSize = `${this.#fontSize}px`;
+    textElement.style.fontWeight = String(this.#fontWeight);
+    textElement.style.opacity = String(this.#opacity);
+    textElement.style.fontStyle = this.#fontStyle;
+    textElement.style.fontFamily = this.#fontName;
 
-    textElement.style.color = `rgb(${color.join(', ')})`;
-    textElement.style.webkitTextStroke = strokeColor.length === 4
-      ? `${strokeWidth}px rgba(${strokeColor.join(', ')})`
-      : `${strokeWidth}px rgb(${strokeColor.join(', ')})`;
+    textElement.style.color = `rgb(${this.#color.join(', ')})`;
+    textElement.style.webkitTextStroke = this.#strokeColor.length === 4
+      ? `${this.#strokeWidth}px rgba(${this.#strokeColor.join(', ')})`
+      : `${this.#strokeWidth}px rgb(${this.#strokeColor.join(', ')})`;
 
-    if (containerWidth === 0) textElement.style.width = 'max-content';
-    else textElement.style.width = `${containerWidth}px`;
-    if (containerHeight === 0) textElement.style.height = 'auto';
-    else textElement.style.height = `${containerHeight}px`;
+    if (this.#containerWidth === 0) textElement.style.width = 'max-content';
+    else textElement.style.width = `${this.#containerWidth}px`;
+    if (this.#containerHeight === 0) textElement.style.height = 'auto';
+    else textElement.style.height = `${this.#containerHeight}px`;
 
     textElement.style.margin = '0 auto';
     textElement.style.display = 'flex';
-    textElement.style.justifyContent = horizontalAlign;
-    textElement.style.alignItems = verticalAlign;
+    textElement.style.justifyContent = this.#horizontalAlign;
+    textElement.style.alignItems = this.#verticalAlign;
 
     document.body.append(textElement);
     return textElement;
   };
 
-  #generateSprite = (textElement: Element,
-    parent: typeof cc.Node,
-    zOrder: number): void => {
+  #generateSprite = (textElement: Element): void => {
     this.#getCanvas(textElement).then((canvas) => {
       textElement.remove();
 
       const id = Guid.generate();
       cc.textureCache.cacheImage(id, canvas);
 
-      this.#createTextSprite(cc.textureCache.getTextureForKey(id), parent, zOrder);
+      this.#createTextSprite(cc.textureCache.getTextureForKey(id));
       return null;
     }).catch(() => null);
   };
@@ -154,9 +176,8 @@ class TextImage extends cc.Sprite {
     logging: false,
   });
 
-  #createTextSprite = (imageTexture, parent, zOrder: number): void => {
+  #createTextSprite = (imageTexture): void => {
     this.setTexture(imageTexture);
-    parent.addChild(this, zOrder);
     this.setVisible(true);
   };
 }
