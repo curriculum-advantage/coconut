@@ -26,7 +26,7 @@ import Guid from '../../../utils/guid/guid';
  *
  * @example
  *
- * const text = new TextImage(MyGameLayer, {
+ * const text = new ImageLabel(MyGameLayer, {
  *   text: 'Title of Game',
  *   color: [255, 255, 255],
  *   fontSize: 22,
@@ -35,13 +35,13 @@ import Guid from '../../../utils/guid/guid';
  *
  * @example
  *
- * this.text = new TextImage(this, {
+ * this.text = new ImageLabel(this, {
  *   text: 'Some paragraph text here.',
  *   fontWeight: 700,
  *   opacity: 100,
  * });
  */
-class TextImage extends cc.Sprite {
+class ImageLabel extends cc.Sprite {
   readonly #zOrder;
 
   readonly #parent;
@@ -187,4 +187,4 @@ class TextImage extends cc.Sprite {
   };
 }
 
-export default TextImage;
+export default ImageLabel;

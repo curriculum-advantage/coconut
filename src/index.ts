@@ -3,7 +3,7 @@ import 'core-js';
 import BackgroundLayer from './nodes/layers/BackgroundLayer';
 
 import MultiLabel from './nodes/sprites/MultiLabel';
-import TextImage from './nodes/sprites/TextImage';
+import ImageLabel from './nodes/sprites/ImageLabel';
 
 import Paragraph from './utils/Paragraph';
 import Input from './utils/Input';
@@ -44,7 +44,7 @@ import embeddedQuestionsGenerator from './utils/embeddedQuestionsGenerator';
 export {
   BackgroundLayer,
 
-  TextImage,
+  ImageLabel,
   MultiLabel,
   Paragraph,
   Input,
@@ -90,7 +90,7 @@ export {
 const coconut = {
   BackgroundLayer,
 
-  TextImage,
+  ImageLabel,
   MultiLabel,
   Paragraph,
   Input,

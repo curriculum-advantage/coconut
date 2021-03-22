@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { primaryFont } from '../../lib/constants';
-import TextImage from '../../nodes/sprites/TextImage';
+import ImageLabel from '../../nodes/sprites/ImageLabel';
 
 /*
  * TODO: Underline, background colors, placeholders (fill in blank), vertical text
@@ -145,7 +145,7 @@ class Paragraph extends cc.Node {
       fontName = this.fontName,
     } = {},
   ) {
-    const label = new TextImage({
+    const label = new ImageLabel({
       parent: this.currentWordNode,
       text,
       color,

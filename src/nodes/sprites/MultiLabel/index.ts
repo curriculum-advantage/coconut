@@ -12,7 +12,7 @@ import {
 } from './helpers/superSubScripts';
 import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
-import TextImage from '../TextImage';
+import ImageLabel from '../ImageLabel';
 
 class MultiLabel extends cc.LayerColor {
   constructor({
@@ -286,7 +286,7 @@ class MultiLabel extends cc.LayerColor {
       return updatedText;
     };
 
-    const createTextLabel = (labelText, labelWeight, labelStyle, color, display = 'flex'): typeof cc.Sprite => new TextImage({
+    const createTextLabel = (labelText, labelWeight, labelStyle, color, display = 'flex'): typeof cc.Sprite => new ImageLabel({
       parent: this,
       text: labelText,
       fontSize,
@@ -303,7 +303,7 @@ class MultiLabel extends cc.LayerColor {
      * '_' is used as space marker
      * @param text the Fraction text
      * @param color the color of the fraction
-     * @returns {TextImage}
+     * @returns {ImageLabel}
      */
     const getFractionLabel = (text, styleFontWeight, styleFontStyle, color): typeof cc.Node => {
       let fraction;
