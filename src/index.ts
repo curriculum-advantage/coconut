@@ -3,12 +3,12 @@ import 'core-js';
 import BackgroundLayer from './nodes/layers/BackgroundLayer';
 
 import MultiLabel from './nodes/sprites/MultiLabel';
+import TextImage from './nodes/sprites/TextImage';
 
 import Paragraph from './utils/Paragraph';
 import Input from './utils/Input';
 import addChildren from './utils/addChildren';
 import createDoubleTapDetector from './utils/createDoubleTapDetector';
-import createLabel from './utils/createLabel';
 import createRect from './utils/createRect';
 import createSprite from './utils/createSprite';
 import createSwipeDetector from './utils/createSwipeDetector';
@@ -44,13 +44,13 @@ import embeddedQuestionsGenerator from './utils/embeddedQuestionsGenerator';
 export {
   BackgroundLayer,
 
+  TextImage,
   MultiLabel,
   Paragraph,
   Input,
 
   addChildren,
   createDoubleTapDetector,
-  createLabel,
   createRect,
   createSprite,
   createSwipeDetector,
@@ -90,13 +90,13 @@ export {
 const coconut = {
   BackgroundLayer,
 
+  TextImage,
   MultiLabel,
   Paragraph,
   Input,
 
   addChildren,
   createDoubleTapDetector,
-  createLabel,
   createRect,
   createSprite,
   createSwipeDetector,
