@@ -1,6 +1,5 @@
 import html2canvas from 'html2canvas';
 import { primaryFont } from '../../../lib/constants';
-import Guid from '../../../utils/guid/guid';
 
 /**
  * Creates a Cocos label
@@ -76,6 +75,8 @@ class ImageLabel extends cc.Sprite {
 
   readonly #display;
 
+  #id;
+
   constructor({
     parent = null,
     text = '',
@@ -130,7 +131,14 @@ class ImageLabel extends cc.Sprite {
     this.setPosition(...this.#position);
     this.setAnchorPoint(...this.#anchor);
 
-    this.#generateSprite(textElement);
+    this.#id = textElement.innerHTML;
+    const cacheTexture = cc.textureCache.getTextureForKey(this.#id);
+    if (cacheTexture) {
+      textElement.remove();
+      this.#createTextSprite(cacheTexture);
+    } else {
+      this.#generateSprite(textElement);
+    }
   };
 
   #generateTextSpan = (text): Element => {
@@ -155,6 +163,10 @@ class ImageLabel extends cc.Sprite {
     else textElement.style.height = `${this.#containerHeight}px`;
 
     textElement.style.margin = '0 auto';
+    textElement.style.position = 'absolute';
+    textElement.style.left = '50%';
+    textElement.style.top = '50%';
+    textElement.style.zIndex = '-999';
     textElement.style.display = this.#display;
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
@@ -166,11 +178,9 @@ class ImageLabel extends cc.Sprite {
   #generateSprite = (textElement: Element): void => {
     this.#getCanvas(textElement).then((canvas) => {
       textElement.remove();
+      cc.textureCache.cacheImage(this.#id, canvas);
 
-      const id = Guid.generate();
-      cc.textureCache.cacheImage(id, canvas);
-
-      this.#createTextSprite(cc.textureCache.getTextureForKey(id));
+      this.#createTextSprite(cc.textureCache.getTextureForKey(this.#id));
       return null;
     }).catch(() => null);
   };
