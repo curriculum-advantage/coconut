@@ -131,7 +131,7 @@ class ImageLabel extends cc.Sprite {
     this.setPosition(...this.#position);
     this.setAnchorPoint(...this.#anchor);
 
-    this.#id = textElement.innerHTML;
+    this.#id = textElement.outerHTML;
     const cacheTexture = cc.textureCache.getTextureForKey(this.#id);
     if (cacheTexture) {
       textElement.remove();
