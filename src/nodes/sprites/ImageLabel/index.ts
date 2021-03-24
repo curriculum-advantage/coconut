@@ -85,6 +85,8 @@ class ImageLabel extends cc.Sprite {
 
   readonly #wordSpacing;
 
+  #text;
+
   #id;
 
   constructor({
@@ -143,6 +145,7 @@ class ImageLabel extends cc.Sprite {
   }
 
   setString = (text): void => {
+    this.#text = text;
     const textElement = this.#generateTextSpan(text);
 
     const width = textElement.clientWidth;
@@ -161,6 +164,8 @@ class ImageLabel extends cc.Sprite {
       this.#generateSprite(textElement);
     }
   };
+
+  getString = (): string => this.#text;
 
   #generateTextSpan = (text): Element => {
     const textElement = document.createElement('p');
