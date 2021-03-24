@@ -81,6 +81,10 @@ class ImageLabel extends cc.Sprite {
 
   readonly #backgroundColor;
 
+  readonly #lineHeight;
+
+  readonly #wordSpacing;
+
   #id;
 
   constructor({
@@ -105,6 +109,8 @@ class ImageLabel extends cc.Sprite {
     display = 'flex',
     cleanDom = true,
     backgroundColor = null,
+    lineHeight = 'normal',
+    wordSpacing = 'normal',
   } = {}) {
     super();
     this.setVisible(false);
@@ -129,6 +135,8 @@ class ImageLabel extends cc.Sprite {
     this.#display = display;
     this.#cleanDom = cleanDom;
     this.#backgroundColor = backgroundColor;
+    this.#lineHeight = lineHeight;
+    this.#wordSpacing = wordSpacing;
 
     this.setString(text);
     this.#parent.addChild(this, this.#zOrder);
@@ -187,6 +195,9 @@ class ImageLabel extends cc.Sprite {
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
     textElement.style.textAlign = this.#textAlign;
+
+    textElement.style.lineHeight = this.#lineHeight;
+    textElement.style.wordSpacing = this.#wordSpacing;
 
     document.body.append(textElement);
     return textElement;
