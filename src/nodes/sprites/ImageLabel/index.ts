@@ -55,6 +55,8 @@ class ImageLabel extends cc.Sprite {
 
   readonly #verticalAlign;
 
+  readonly #textAlign;
+
   readonly #fontWeight;
 
   readonly #fontStyle;
@@ -75,6 +77,10 @@ class ImageLabel extends cc.Sprite {
 
   readonly #display;
 
+  readonly #cleanDom;
+
+  readonly #backgroundColor;
+
   #id;
 
   constructor({
@@ -87,6 +93,7 @@ class ImageLabel extends cc.Sprite {
     fontStyle = 'normal' as FontStyle,
     horizontalAlign = 'left' as HorizontalAlignment,
     verticalAlign = 'top' as VerticalAlignment,
+    textAlign = 'left',
     position = [250, 250] as Point,
     color = [0, 0, 0] as Color,
     strokeColor = [255, 0, 0],
@@ -96,6 +103,8 @@ class ImageLabel extends cc.Sprite {
     containerWidth = 0,
     containerHeight = 0,
     display = 'flex',
+    cleanDom = true,
+    backgroundColor = null,
   } = {}) {
     super();
     this.setVisible(false);
@@ -108,6 +117,7 @@ class ImageLabel extends cc.Sprite {
     this.#fontStyle = fontStyle;
     this.#horizontalAlign = horizontalAlign;
     this.#verticalAlign = verticalAlign;
+    this.#textAlign = textAlign;
     this.#position = position;
     this.#color = color;
     this.#strokeColor = strokeColor;
@@ -117,6 +127,9 @@ class ImageLabel extends cc.Sprite {
     this.#containerWidth = containerWidth;
     this.#containerHeight = containerHeight;
     this.#display = display;
+    this.#cleanDom = cleanDom;
+    this.#backgroundColor = backgroundColor;
+
     this.setString(text);
     this.#parent.addChild(this, this.#zOrder);
   }
@@ -134,7 +147,7 @@ class ImageLabel extends cc.Sprite {
     this.#id = textElement.outerHTML;
     const cacheTexture = cc.textureCache.getTextureForKey(this.#id);
     if (cacheTexture) {
-      textElement.remove();
+      if (this.#cleanDom) textElement.remove();
       this.#createTextSprite(cacheTexture);
     } else {
       this.#generateSprite(textElement);
@@ -162,14 +175,18 @@ class ImageLabel extends cc.Sprite {
     if (this.#containerHeight === 0) textElement.style.height = 'auto';
     else textElement.style.height = `${this.#containerHeight}px`;
 
-    textElement.style.margin = '0 auto';
-    textElement.style.position = 'absolute';
-    textElement.style.left = '50%';
-    textElement.style.top = '50%';
-    textElement.style.zIndex = '-999';
+    if (this.#cleanDom) {
+      textElement.style.margin = '0 auto';
+      textElement.style.position = 'absolute';
+      textElement.style.left = '50%';
+      textElement.style.top = '50%';
+      textElement.style.zIndex = '-999';
+    }
+
     textElement.style.display = this.#display;
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
+    textElement.style.textAlign = this.#textAlign;
 
     document.body.append(textElement);
     return textElement;
@@ -177,7 +194,7 @@ class ImageLabel extends cc.Sprite {
 
   #generateSprite = (textElement: Element): void => {
     this.#getCanvas(textElement).then((canvas) => {
-      textElement.remove();
+      if (this.#cleanDom) textElement.remove();
       cc.textureCache.cacheImage(this.#id, canvas);
 
       this.#createTextSprite(cc.textureCache.getTextureForKey(this.#id));
@@ -186,7 +203,7 @@ class ImageLabel extends cc.Sprite {
   };
 
   #getCanvas = (textElement): Promise<HTMLCanvasElement> => html2canvas(textElement, {
-    backgroundColor: null,
+    backgroundColor: this.#backgroundColor,
     scale: 1,
     logging: false,
   });
