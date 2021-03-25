@@ -2,11 +2,12 @@ import html2canvas from 'html2canvas';
 import { primaryFont } from '../../../lib/constants';
 
 /**
- * Creates a Cocos label
+ * Creates a Cocos image sprite as a label.
  *
  * @param parent Parent node (scene/layer/sprite) that the label should be added to.
- * @param options Options object.
  * @param options.text Text that the label will display.
+ * @param option.display used to override the default dom display behavior.
+ * @param options.textAlign used in conjunction with option.display to change the default dom text align behavior.
  * @param options.opacity Opacity of the displayed text.
  * @param options.fontName Font of the displayed text.
  * @param options.fontSize Font size of the displayed text.
@@ -14,27 +15,24 @@ import { primaryFont } from '../../../lib/constants';
  * @param options.verticalAlign Vertical alignment of the displayed text.
  * @param options.fontWeight Font weight of the displayed text.
  * @param options.fontStyle Font style of the displayed text.
+ * @param options.lineHeight specifies the height of a line.
+ * @param options.wordSpacing increases or decreases the white space between words.
  * @param options.position Position (relative to `parent`) that the label `anchor` is placed at.
  * @param options.color Color of the displayed text.
- * @param options.strokeColor Stroke color of the displayed text. Requires a `strokeSize` greater
- * * @param options.display the base dom display behavior
- * than 0.
+ * @param options.strokeColor Stroke color of the displayed text. Requires a `strokeSize` greater than 0.
  * @param options.strokeSize Stroke size of the displayed text.
  * @param options.anchor Anchor point of the label, to be used by `position`. @see
  *   {@link https://docs.cocos2d-x.org/cocos2d-x/en/basic_concepts/sprites.html|Cocos2d-x Sprites}
- *
+ * @param options.zOrder the sprite stacking order in it's parent.
+ * @param options.containerWidth the base width of the sprite. Auto if value not set.
+ * @param options.containerHeight the base height of the sprite. Auto if value not set.
+ * @param options.dimensions the height and width of the sprite. Overrides options.containerWidth and
+ *  options.containerHeight if set.
+ *  @param options.backgroundColor sets a color of the sprite background
+ *  @param options.cleanDom flag for cleaning the dom by removing the generated html elements
  * @example
  *
- * const text = new ImageLabel(MyGameLayer, {
- *   text: 'Title of Game',
- *   color: [255, 255, 255],
- *   fontSize: 22,
- *   position: [0, 0],
- * });
- *
- * @example
- *
- * this.text = new ImageLabel(this, {
+ * this.text = new ImageLabel({
  *   text: 'Some paragraph text here.',
  *   fontWeight: 700,
  *   opacity: 100,
@@ -61,6 +59,10 @@ class ImageLabel extends cc.Sprite {
 
   readonly #fontStyle;
 
+  readonly #lineHeight;
+
+  readonly #wordSpacing;
+
   readonly #position;
 
   readonly #color;
@@ -81,10 +83,6 @@ class ImageLabel extends cc.Sprite {
 
   readonly #backgroundColor;
 
-  readonly #lineHeight;
-
-  readonly #wordSpacing;
-
   #text;
 
   #id;
@@ -97,8 +95,11 @@ class ImageLabel extends cc.Sprite {
     fontSize = 16,
     fontWeight = 400,
     fontStyle = 'normal' as FontStyle,
-    horizontalAlign = 'left' as HorizontalAlignment,
-    verticalAlign = 'top' as VerticalAlignment,
+    lineHeight = 'normal',
+    wordSpacing = 'normal',
+    display = 'flex',
+    horizontalAlign = 'flex-start' as HorizontalAlignment,
+    verticalAlign = 'flex-start' as VerticalAlignment,
     textAlign = 'left',
     position = [250, 250] as Point,
     color = [0, 0, 0] as Color,
@@ -108,11 +109,9 @@ class ImageLabel extends cc.Sprite {
     zOrder = 0,
     containerWidth = 0,
     containerHeight = 0,
-    display = 'flex',
-    cleanDom = true,
+    dimensions = null as Size,
     backgroundColor = null,
-    lineHeight = 'normal',
-    wordSpacing = 'normal',
+    cleanDom = true,
   } = {}) {
     super();
     this.setVisible(false);
@@ -123,6 +122,8 @@ class ImageLabel extends cc.Sprite {
     this.#fontSize = fontSize;
     this.#fontWeight = fontWeight;
     this.#fontStyle = fontStyle;
+    this.#lineHeight = lineHeight;
+    this.#wordSpacing = wordSpacing;
     this.#horizontalAlign = horizontalAlign;
     this.#verticalAlign = verticalAlign;
     this.#textAlign = textAlign;
@@ -132,13 +133,11 @@ class ImageLabel extends cc.Sprite {
     this.#strokeWidth = strokeWidth;
     this.#anchor = anchor;
     this.#zOrder = zOrder;
-    this.#containerWidth = containerWidth;
-    this.#containerHeight = containerHeight;
+    this.#containerWidth = dimensions ? dimensions[0] : containerWidth;
+    this.#containerHeight = dimensions ? dimensions[1] : containerHeight;
     this.#display = display;
-    this.#cleanDom = cleanDom;
     this.#backgroundColor = backgroundColor;
-    this.#lineHeight = lineHeight;
-    this.#wordSpacing = wordSpacing;
+    this.#cleanDom = cleanDom;
 
     this.setString(text);
     this.#parent.addChild(this, this.#zOrder);
@@ -166,6 +165,19 @@ class ImageLabel extends cc.Sprite {
   };
 
   getString = (): string => this.#text;
+
+  setDimensions = (size, height) => {
+    if (typeof size === 'number') {
+      this.setContentSize(size, height);
+    } else if (Array.isArray(size)) {
+      this.setContentSize(...size);
+    } else if (typeof size === 'object') {
+      const { width, height: sHeight } = size;
+      this.setContentSize(width, sHeight);
+    }
+  };
+
+  getDimensions = (): object => this.getContentSize();
 
   #generateTextSpan = (text): Element => {
     const textElement = document.createElement('p');
@@ -200,6 +212,7 @@ class ImageLabel extends cc.Sprite {
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
     textElement.style.textAlign = this.#textAlign;
+    textElement.style.overflow = 'hidden';
 
     textElement.style.lineHeight = this.#lineHeight;
     textElement.style.wordSpacing = this.#wordSpacing;
