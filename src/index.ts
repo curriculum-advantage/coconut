@@ -2,8 +2,8 @@ import 'core-js';
 
 import BackgroundLayer from './nodes/layers/BackgroundLayer';
 
-import MultiLabel from './nodes/sprites/MultiLabel';
-import ImageLabel from './nodes/sprites/ImageLabel';
+import { MultiLabel } from './nodes/sprites/MultiLabelImpl';
+import { ImageLabel } from './nodes/sprites/ImageLabelImpl';
 
 import Paragraph from './utils/Paragraph';
 import Input from './utils/Input';

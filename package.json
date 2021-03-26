@@ -139,7 +139,7 @@
       ],
       "complexity": [
         "error",
-        5
+        10
       ],
       "max-params": [
         "error",
@@ -178,6 +178,12 @@
             "camelCase": true,
             "pascalCase": true
           }
+        }
+      ],
+      "max-len": [
+        "warn",
+        {
+          "code": 120
         }
       ],
       "unicorn/expiring-todo-comments": "off"

@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { primaryFont } from '../../lib/constants';
-import ImageLabel from '../../nodes/sprites/ImageLabel';
+import { ImageLabel } from '../../nodes/sprites/ImageLabelImpl';
 
 /*
  * TODO: Underline, background colors, placeholders (fill in blank), vertical text

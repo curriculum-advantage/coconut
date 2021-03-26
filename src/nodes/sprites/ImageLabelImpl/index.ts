@@ -1,5 +1,6 @@
 import html2canvas from 'html2canvas';
 import { primaryFont } from '../../../lib/constants';
+import CreateCallableConstructor from '../../util';
 
 /**
  * Creates a Cocos image sprite as a label.
@@ -38,10 +39,8 @@ import { primaryFont } from '../../../lib/constants';
  *   opacity: 100,
  * });
  */
-class ImageLabel extends cc.Sprite {
+class ImageLabelImpl extends cc.Sprite {
   readonly #zOrder;
-
-  readonly #parent;
 
   readonly #opacity;
 
@@ -87,6 +86,7 @@ class ImageLabel extends cc.Sprite {
 
   #id;
 
+  // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
     parent = null,
     text = '',
@@ -116,7 +116,6 @@ class ImageLabel extends cc.Sprite {
     super();
     this.setVisible(false);
 
-    this.#parent = parent;
     this.#opacity = opacity;
     this.#fontName = fontName;
     this.#fontSize = fontSize;
@@ -140,7 +139,7 @@ class ImageLabel extends cc.Sprite {
     this.#cleanDom = cleanDom;
 
     this.setString(text);
-    this.#parent.addChild(this, this.#zOrder);
+    if (parent) parent.addChild(this, this.#zOrder);
   }
 
   setString = (text): void => {
@@ -179,6 +178,7 @@ class ImageLabel extends cc.Sprite {
 
   getDimensions = (): object => this.getContentSize();
 
+  // eslint-disable-next-line max-statements
   #generateTextSpan = (text): Element => {
     const textElement = document.createElement('p');
 
@@ -243,4 +243,6 @@ class ImageLabel extends cc.Sprite {
   };
 }
 
-export default ImageLabel;
+export const ImageLabel = CreateCallableConstructor(ImageLabelImpl);
+
+export default ImageLabelImpl;
