@@ -12,7 +12,7 @@ import {
 } from './helpers/superSubScripts';
 import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
-import ImageLabelImpl, { ImageLabel } from '../ImageLabelImpl';
+import { ImageLabel } from '../ImageLabelImpl';
 import CreateCallableConstructor from '../../util';
 
 class MultiLabelImpl extends cc.LayerColor {
@@ -85,22 +85,24 @@ class MultiLabelImpl extends cc.LayerColor {
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
     text = '',
-    anchor = [0, 0],
+    anchor = [0, 0] as Point,
     areaClick = false,
     clickHandler = (): void => {},
     containerWidth = 250,
     containerHeight = 100,
     defaultFillIn = '_____',
-    fontColorHighlight = [21, 15, 242],
-    fontColorPrimary = [0, 0, 0],
+    fontColorHighlight = [21, 15, 242] as Color,
+    fontColorPrimary = [0, 0, 0] as Color,
     fontSize = 16,
-    fontStyle = 'normal', // normal or italic
+    fontStyle = 'normal' as FontStyle,
     fontWeight = 400,
-    horizontalAlignment = 'left',
+    horizontalAlignment = 'left' as MultiLabelHorizontalAlignment,
     lineHeight = 1.2,
-    position = [250, 250],
+    position = [250, 250] as Point,
     wordSpace = 3.5,
     cleanDom = true,
+    parent = null,
+    zOrder = 0,
   } = {},
   objectParameters: { styleSyntaxes?: object; drawSymbol?: Function; reset?: Function } = {}) {
     super(cc.color(255, 255, 255, 0));
@@ -153,6 +155,7 @@ class MultiLabelImpl extends cc.LayerColor {
     };
 
     this.setString(text);
+    if (parent) parent.addChild(text, zOrder);
   }
 
   setString = (text): void => {
