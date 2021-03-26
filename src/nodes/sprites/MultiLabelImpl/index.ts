@@ -608,4 +608,4 @@ class MultiLabelImpl extends cc.LayerColor {
 
 export default MultiLabelImpl;
 
-export const MultiLabel = CreateCallableConstructor(ImageLabelImpl);
+export const MultiLabel = CreateCallableConstructor(MultiLabelImpl);
