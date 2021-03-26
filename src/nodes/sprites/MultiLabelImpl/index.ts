@@ -84,6 +84,7 @@ class MultiLabelImpl extends cc.LayerColor {
 
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
+    text = '',
     anchor = [0, 0],
     areaClick = false,
     clickHandler = (): void => {},
@@ -150,6 +151,8 @@ class MultiLabelImpl extends cc.LayerColor {
       shiftDownSyntax: '[SHIFTDOWN]',
       shiftUpSyntax: '[SHIFTUP]',
     };
+
+    this.setString(text);
   }
 
   setString = (text): void => {
