@@ -64,8 +64,6 @@ class ImageLabelImpl extends cc.Sprite {
 
   readonly #position;
 
-  readonly #color;
-
   readonly #strokeColor;
 
   readonly #strokeWidth;
@@ -80,11 +78,13 @@ class ImageLabelImpl extends cc.Sprite {
 
   readonly #cleanDom;
 
-  readonly #backgroundColor;
-
   #text;
 
   #id;
+
+  #color;
+
+  #backgroundColor;
 
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
@@ -177,6 +177,16 @@ class ImageLabelImpl extends cc.Sprite {
   };
 
   getDimensions = (): object => this.getContentSize();
+
+  setColor = (color: Color): void => {
+    this.#color = color;
+    this.setString(this.#text);
+  };
+
+  setBackgroundColor = (color: Color): void => {
+    this.#backgroundColor = color;
+    this.setString(this.#text);
+  };
 
   // eslint-disable-next-line max-statements
   #generateTextSpan = (text): Element => {
