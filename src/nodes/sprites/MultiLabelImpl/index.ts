@@ -155,7 +155,7 @@ class MultiLabelImpl extends cc.LayerColor {
     };
 
     this.setString(text);
-    if (parent) parent.addChild(text, zOrder);
+    if (parent) parent.addChild(this, zOrder);
   }
 
   setString = (text): void => {
