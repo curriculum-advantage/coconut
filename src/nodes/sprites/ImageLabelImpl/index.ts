@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas';
 import { primaryFont } from '../../../lib/constants';
 import CreateCallableConstructor from '../../util';
+import isPointOnTarget from '../../../utils/isPointOnTarget';
 
 /**
  * Creates a Cocos image sprite as a label.
@@ -19,8 +20,8 @@ import CreateCallableConstructor from '../../util';
  * @param options.lineHeight specifies the height of a line.
  * @param options.wordSpacing increases or decreases the white space between words.
  * @param options.position Position (relative to `parent`) that the label `anchor` is placed at.
- * @param options.color Color of the displayed text.
- * @param options.strokeColor Stroke color of the displayed text. Requires a `strokeSize` greater than 0.
+ * @param options.fontColor Color of the displayed text.
+ * @param options.strokeColor Stroke fontColor of the displayed text. Requires a `strokeSize` greater than 0.
  * @param options.strokeSize Stroke size of the displayed text.
  * @param options.anchor Anchor point of the label, to be used by `position`. @see
  *   {@link https://docs.cocos2d-x.org/cocos2d-x/en/basic_concepts/sprites.html|Cocos2d-x Sprites}
@@ -29,7 +30,7 @@ import CreateCallableConstructor from '../../util';
  * @param options.containerHeight the base height of the sprite. Auto if value not set.
  * @param options.dimensions the height and width of the sprite. Overrides options.containerWidth and
  *  options.containerHeight if set.
- *  @param options.backgroundColor sets a color of the sprite background
+ *  @param options.backgroundColor sets a fontColor of the sprite background
  *  @param options.cleanDom flag for cleaning the dom by removing the generated html elements
  * @example
  *
@@ -82,9 +83,13 @@ class ImageLabelImpl extends cc.Sprite {
 
   #id;
 
-  #color;
+  #fontColor;
 
   #backgroundColor;
+
+  #listener;
+
+  #clickHandler;
 
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
@@ -93,7 +98,7 @@ class ImageLabelImpl extends cc.Sprite {
     opacity = 1,
     fontName = primaryFont,
     fontSize = 16,
-    fontWeight = 400,
+    fontWeight = '400',
     fontStyle = 'normal' as FontStyle,
     lineHeight = 'normal',
     wordSpacing = 'normal',
@@ -127,7 +132,7 @@ class ImageLabelImpl extends cc.Sprite {
     this.#verticalAlign = verticalAlign;
     this.#textAlign = textAlign;
     this.#position = position;
-    this.#color = color;
+    this.#fontColor = color;
     this.#strokeColor = strokeColor;
     this.#strokeWidth = strokeWidth;
     this.#anchor = anchor;
@@ -165,7 +170,7 @@ class ImageLabelImpl extends cc.Sprite {
 
   getString = (): string => this.#text;
 
-  setDimensions = (size, height) => {
+  setDimensions = (size, height): void => {
     if (typeof size === 'number') {
       this.setContentSize(size, height);
     } else if (Array.isArray(size)) {
@@ -178,14 +183,25 @@ class ImageLabelImpl extends cc.Sprite {
 
   getDimensions = (): object => this.getContentSize();
 
-  setColor = (color: Color): void => {
-    this.#color = color;
+  setFontColor = (color: Color): void => {
+    this.#fontColor = color;
     this.setString(this.#text);
   };
 
   setBackgroundColor = (color: Color): void => {
     this.#backgroundColor = color;
     this.setString(this.#text);
+  };
+
+  setClickHandler = (clickHandler): void => {
+    this.#clickHandler = clickHandler;
+    this.#addListener();
+  };
+
+  setClickEnabled = (enable): void => {
+    if (this.#listener) {
+      this.#listener.setEnabled(enable);
+    }
   };
 
   // eslint-disable-next-line max-statements
@@ -200,7 +216,7 @@ class ImageLabelImpl extends cc.Sprite {
     textElement.style.fontStyle = this.#fontStyle;
     textElement.style.fontFamily = this.#fontName;
 
-    textElement.style.color = `rgb(${this.#color.join(', ')})`;
+    textElement.style.color = `rgb(${this.#fontColor.join(', ')})`;
     textElement.style.webkitTextStroke = this.#strokeColor.length === 4
       ? `${this.#strokeWidth}px rgba(${this.#strokeColor.join(', ')})`
       : `${this.#strokeWidth}px rgb(${this.#strokeColor.join(', ')})`;
@@ -250,6 +266,19 @@ class ImageLabelImpl extends cc.Sprite {
   #createTextSprite = (imageTexture): void => {
     this.setTexture(imageTexture);
     this.setVisible(true);
+  };
+
+  #addListener = (): void => {
+    this.#listener = cc.eventManager.addListener({
+      event: cc.EventListener.TOUCH_ONE_BY_ONE,
+      swallowTouches: false,
+      onTouchBegan: () => true,
+      onTouchEnded: (event) => {
+        if (isPointOnTarget(event, this)) {
+          if (this.#clickHandler) this.#clickHandler(this);
+        }
+      },
+    }, this);
   };
 }
 

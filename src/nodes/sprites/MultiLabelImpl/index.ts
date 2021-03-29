@@ -14,6 +14,7 @@ import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
 import { ImageLabel } from '../ImageLabelImpl';
 import CreateCallableConstructor from '../../util';
+import { primaryFont } from '../../../lib/constants';
 
 class MultiLabelImpl extends cc.LayerColor {
   readonly #position;
@@ -29,6 +30,8 @@ class MultiLabelImpl extends cc.LayerColor {
   readonly #fontStyle;
 
   readonly #fontWeight;
+
+  readonly #fontName;
 
   readonly #containerWidth;
 
@@ -49,8 +52,6 @@ class MultiLabelImpl extends cc.LayerColor {
   readonly #otherSyntaxes;
 
   readonly #areaClick;
-
-  readonly #clickHandler;
 
   readonly #defaultFillIn;
 
@@ -82,6 +83,12 @@ class MultiLabelImpl extends cc.LayerColor {
 
   #displayedText;
 
+  #cleanDisplayedText;
+
+  #listener;
+
+  #clickHandler;
+
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
     text = '',
@@ -93,6 +100,7 @@ class MultiLabelImpl extends cc.LayerColor {
     defaultFillIn = '_____',
     fontColorHighlight = [21, 15, 242] as Color,
     fontColorPrimary = [0, 0, 0] as Color,
+    fontName = primaryFont,
     fontSize = 16,
     fontStyle = 'normal' as FontStyle,
     fontWeight = 400,
@@ -163,8 +171,10 @@ class MultiLabelImpl extends cc.LayerColor {
     const updatedText = this.#notateStyles(text);
     this.#initiateFillIns(this.#displayedText);
     this.#render(updatedText);
-    this.#addListener();
+    if (this.#clickHandler) this.#addListener();
   };
+
+  getString = (): string => this.#cleanDisplayedText;
 
   /**
    * Display a white solid background unless otherwise specified
@@ -189,6 +199,17 @@ class MultiLabelImpl extends cc.LayerColor {
 
   resetClicked = (): void => {
     this.#wasClicked = false;
+  };
+
+  setClickHandler = (handler): void => {
+    this.#clickHandler = handler;
+    this.#addListener();
+  };
+
+  setClickEnabled = (enable): void => {
+    if (this.#listener) {
+      this.#listener.setEnabled(enable);
+    }
   };
 
   #updateRangeValues = (unStyledText, syntax): string => {
@@ -405,6 +426,7 @@ class MultiLabelImpl extends cc.LayerColor {
     text: labelText,
     fontSize: this.#fontSize,
     display,
+    fontName: this.#fontName,
     fontWeight: labelWeight,
     fontStyle: labelStyle,
     anchor: [0, 0],
@@ -465,10 +487,9 @@ class MultiLabelImpl extends cc.LayerColor {
 
   #createAndAddLabel = (text): void => {
     const styling = this.#getStyling(text);
-    const updatedText = this.#cleanText(text);
+    this.#cleanDisplayedText = this.#cleanText(text);
 
-
-    const { styleFontStyle, color, textLabel } = this.#createStyledLabel(styling, updatedText);
+    const { styleFontStyle, color, textLabel } = this.#createStyledLabel(styling, this.#cleanDisplayedText);
 
     const drawObject = {
       // @ts-ignore
@@ -550,20 +571,18 @@ class MultiLabelImpl extends cc.LayerColor {
   };
 
   #addListener = (): void => {
-    cc.eventManager.addListener({
+    this.#listener = cc.eventManager.addListener({
       event: cc.EventListener.TOUCH_ONE_BY_ONE,
       swallowTouches: false,
       onTouchBegan: () => true,
       onTouchEnded: (event) => {
         if (this.#areaClick && isPointOnTarget(event, this)) {
           this.#wasClicked = true;
-          // @ts-ignore
-          this.#clickHandler(this.#labels);
+          this.#clickHandler(this.#labels, this);
         } else {
           this.#labels.some((label, index) => {
             if (isPointOnTarget(event, label)) {
-              // @ts-ignore
-              this.#clickHandler(label, index);
+              this.#clickHandler(label, index, this);
               return true;
             }
             return false;
