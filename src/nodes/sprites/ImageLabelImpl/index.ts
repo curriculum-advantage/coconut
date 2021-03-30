@@ -1,7 +1,9 @@
 import html2canvas from 'html2canvas';
+import hash from 'hash-it';
 import { primaryFont } from '../../../lib/constants';
 import CreateCallableConstructor from '../../util';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
+import Queue from '../../../utils/Queue';
 
 /**
  * Creates a Cocos image sprite as a label.
@@ -81,7 +83,7 @@ class ImageLabelImpl extends cc.Sprite {
 
   #text;
 
-  #id;
+  #textElement;
 
   #fontColor;
 
@@ -90,6 +92,10 @@ class ImageLabelImpl extends cc.Sprite {
   #listener;
 
   #clickHandler;
+
+  #queue = new Queue();
+
+  #rendering = false;
 
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
@@ -119,7 +125,6 @@ class ImageLabelImpl extends cc.Sprite {
     cleanDom = true,
   } = {}) {
     super();
-    this.setVisible(false);
 
     this.#opacity = opacity;
     this.#fontName = fontName;
@@ -148,29 +153,15 @@ class ImageLabelImpl extends cc.Sprite {
   }
 
   setString = (text): void => {
-    this.#text = text;
-    const textElement = this.#generateTextSpan(text);
-
-    const width = textElement.clientWidth;
-    const height = textElement.clientHeight;
-
-    this.setContentSize(width, height);
-    this.setPosition(...this.#position);
-    this.setAnchorPoint(...this.#anchor);
-
-    this.#id = textElement.outerHTML;
-    const cacheTexture = cc.textureCache.getTextureForKey(this.#id);
-    if (cacheTexture) {
-      if (this.#cleanDom) textElement.remove();
-      this.#createTextSprite(cacheTexture);
-    } else {
-      this.#generateSprite(textElement);
+    this.#queue.enqueue(text);
+    if (!this.#rendering) {
+      this.#setStringFromQueue(this.#queue.dequeue());
     }
   };
 
-  getString = (): string => this.#text;
+  getString = (): string => this.#textElement.textContent;
 
-  setDimensions = (size, height): void => {
+  setDimensions = (size: [number, number] | { width: number; height: number } | number, height: number): void => {
     if (typeof size === 'number') {
       this.setContentSize(size, height);
     } else if (Array.isArray(size)) {
@@ -193,19 +184,42 @@ class ImageLabelImpl extends cc.Sprite {
     this.setString(this.#text);
   };
 
-  setClickHandler = (clickHandler): void => {
+  setClickHandler = (clickHandler: (ImageLabelImpl) => void): void => {
     this.#clickHandler = clickHandler;
     this.#addListener();
   };
 
-  setClickEnabled = (enable): void => {
+  setClickEnabled = (enable: boolean): void => {
     if (this.#listener) {
       this.#listener.setEnabled(enable);
     }
   };
 
+  #setStringFromQueue = (text: string): void => {
+    this.#rendering = true;
+    this.#text = text;
+    this.#textElement = this.#generateTextSpan(text);
+
+    const width = this.#textElement.clientWidth;
+    const height = this.#textElement.clientHeight;
+
+    this.setContentSize(width, height);
+    this.setPosition(...this.#position);
+    this.setAnchorPoint(...this.#anchor);
+
+    const id = hash(this.#textElement);
+    const cacheTexture = cc.textureCache.getTextureForKey(id);
+
+    if (cacheTexture) {
+      if (this.#cleanDom) this.#textElement.remove();
+      this.#createTextSprite(cacheTexture);
+    } else {
+      this.#generateSprite(this.#textElement, id);
+    }
+  };
+
   // eslint-disable-next-line max-statements
-  #generateTextSpan = (text): Element => {
+  #generateTextSpan = (text): HTMLElement => {
     const textElement = document.createElement('p');
 
     textElement.innerHTML = text;
@@ -234,11 +248,16 @@ class ImageLabelImpl extends cc.Sprite {
       textElement.style.zIndex = '-999';
     }
 
-    textElement.style.display = this.#display;
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
     textElement.style.textAlign = this.#textAlign;
-    textElement.style.overflow = 'hidden';
+
+    if (text && String(text).trim().length > 0) {
+      textElement.style.display = this.#display;
+    } else {
+      textElement.style.whiteSpace = 'pre';
+      textElement.style.display = 'block';
+    }
 
     textElement.style.lineHeight = this.#lineHeight;
     textElement.style.wordSpacing = this.#wordSpacing;
@@ -247,12 +266,12 @@ class ImageLabelImpl extends cc.Sprite {
     return textElement;
   };
 
-  #generateSprite = (textElement: Element): void => {
+  #generateSprite = (textElement: HTMLElement, id: number): void => {
     this.#getCanvas(textElement).then((canvas) => {
       if (this.#cleanDom) textElement.remove();
-      cc.textureCache.cacheImage(this.#id, canvas);
+      cc.textureCache.cacheImage(id, canvas);
 
-      this.#createTextSprite(cc.textureCache.getTextureForKey(this.#id));
+      this.#createTextSprite(cc.textureCache.getTextureForKey(id));
       return null;
     }).catch(() => null);
   };
@@ -265,7 +284,10 @@ class ImageLabelImpl extends cc.Sprite {
 
   #createTextSprite = (imageTexture): void => {
     this.setTexture(imageTexture);
-    this.setVisible(true);
+    this.#rendering = false;
+    if (!this.#queue.isEmpty()) {
+      this.#setStringFromQueue(this.#queue.dequeue());
+    }
   };
 
   #addListener = (): void => {

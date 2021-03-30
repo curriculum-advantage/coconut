@@ -56,6 +56,7 @@
     "@types/lodash": "^4.14.121",
     "core-js": "^2.6.9",
     "detect-browser": "^4.7.0",
+    "hash-it": "^5.0.0",
     "howler": "^2.1.2",
     "html2canvas": "git+https://github.com/curriculum-advantage/html2canvas.git",
     "is_js": "^0.9.0",

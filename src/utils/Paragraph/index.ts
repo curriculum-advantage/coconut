@@ -11,7 +11,7 @@ import { ImageLabel } from '../../nodes/sprites/ImageLabelImpl';
  * of those words appear).
  *
  * NOTE: This is an experimental node, with the goal of potentially deprecating the MultiLabel node.
-*/
+ */
 
 /**
  * Helper for creating complex labels. Use cases include multiline text, styled text (highlights,
@@ -54,6 +54,7 @@ class Paragraph extends cc.Node {
     opacity = 255,
     fontColorPrimary = [0, 0, 0],
     lineHeight = 1.2,
+    cleanDom = true,
   }) {
     super();
     this.fontColorPrimary = fontColorPrimary;
@@ -65,6 +66,7 @@ class Paragraph extends cc.Node {
     this.fontSize = fontSize;
     this.fontName = fontName;
     this.lineHeight = lineHeight;
+    this.cleanDom = cleanDom;
     this.containerDimensions = containerDimensions;
     this.setInitialState();
     this.setup(parent, position, anchor, text);
@@ -143,6 +145,7 @@ class Paragraph extends cc.Node {
       fontWeight = this.fontWeight,
       fontStyle = this.fontStyle,
       fontName = this.fontName,
+      cleanDom = this.cleanDom,
     } = {},
   ) {
     const label = new ImageLabel({
@@ -154,6 +157,7 @@ class Paragraph extends cc.Node {
       fontWeight,
       fontStyle,
       fontName,
+      cleanDom,
       anchor: [0, 0],
       position: this.nextCharLabelPos() as Point,
     });
