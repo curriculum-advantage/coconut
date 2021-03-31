@@ -97,6 +97,10 @@ class ImageLabelImpl extends cc.Sprite {
 
   #rendering = false;
 
+  #addShadow;
+
+  #shadowProperty;
+
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
     parent = null,
@@ -210,6 +214,19 @@ class ImageLabelImpl extends cc.Sprite {
     super.setPositionY(y);
   };
 
+  enableShadow = (v: number, h: number, color: Color, b = 0): void => {
+    this.#addShadow = true;
+    const colorType = color.length === 3 ? 'rgb' : 'rgba';
+    this.#shadowProperty = `${v}px ${h}px ${b}px ${colorType}(${color.join(', ')})`;
+    this.setString(this.#text);
+  };
+
+  disableShadow = (): void => {
+    this.#addShadow = false;
+    this.#shadowProperty = null;
+    this.setString(this.#text);
+  };
+
   #setStringFromQueue = (text: string): void => {
     this.#rendering = true;
     this.#text = text;
@@ -266,6 +283,10 @@ class ImageLabelImpl extends cc.Sprite {
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
     textElement.style.textAlign = this.#textAlign;
+
+    if (this.#addShadow) {
+      textElement.style.textShadow = this.#shadowProperty;
+    }
 
     if (text && String(text).trim().length > 0) {
       textElement.style.display = this.#display;
