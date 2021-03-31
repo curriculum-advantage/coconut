@@ -133,6 +133,7 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#objectParameters = objectParameters;
 
     this.#fontSize = fontSize;
+    this.#fontName = fontName;
     this.#lineOffset = fontSize * lineHeight;
     this.#wordOffset = fontSize / wordSpace;
     this.#positionY = containerHeight - this.#lineOffset - 5;
@@ -299,7 +300,9 @@ class MultiLabelImpl extends cc.LayerColor {
       } else if (syntax.includes('ANGLE')) {
         cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '    ');
       } else if (syntax.includes('SQRT')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '  ');
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style="font-size:${this.#fontSize + 2}px">&radic;<span style='text-decoration:overline;'>`);
+        cleanedText += '</span></span>';
       } else cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '');
     });
     return cleanedText;
@@ -628,6 +631,6 @@ class MultiLabelImpl extends cc.LayerColor {
   };
 }
 
-export default MultiLabelImpl;
-
 export const MultiLabel = CreateCallableConstructor(MultiLabelImpl);
+
+export default MultiLabelImpl;
