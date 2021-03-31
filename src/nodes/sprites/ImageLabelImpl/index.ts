@@ -65,8 +65,6 @@ class ImageLabelImpl extends cc.Sprite {
 
   readonly #wordSpacing;
 
-  readonly #position;
-
   readonly #strokeColor;
 
   readonly #strokeWidth;
@@ -88,6 +86,8 @@ class ImageLabelImpl extends cc.Sprite {
   #fontColor;
 
   #backgroundColor;
+
+  #position;
 
   #listener;
 
@@ -195,6 +195,21 @@ class ImageLabelImpl extends cc.Sprite {
     }
   };
 
+  setPosition = (x: number, y: number): void => {
+    this.#position = [x, y];
+    super.setPosition(x, y);
+  };
+
+  setPositionX = (x: number): void => {
+    this.#position[0] = x;
+    super.setPositionX(x);
+  };
+
+  setPositionY = (y: number): void => {
+    this.#position[1] = y;
+    super.setPositionY(y);
+  };
+
   #setStringFromQueue = (text: string): void => {
     this.#rendering = true;
     this.#text = text;
@@ -204,7 +219,7 @@ class ImageLabelImpl extends cc.Sprite {
     const height = this.#textElement.clientHeight;
 
     this.setContentSize(width, height);
-    this.setPosition(...this.#position);
+    super.setPosition(...this.#position);
     this.setAnchorPoint(...this.#anchor);
 
     const id = hash(this.#textElement);
