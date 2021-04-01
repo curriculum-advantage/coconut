@@ -156,6 +156,11 @@ class ImageLabelImpl extends cc.Sprite {
     if (parent) parent.addChild(this, this.#zOrder);
   }
 
+  /**
+   * Sets the label string
+   *
+   * @param text the html string used to generate the label image
+   */
   setString = (text): void => {
     this.#queue.enqueue(text);
     if (!this.#rendering) {
@@ -163,8 +168,17 @@ class ImageLabelImpl extends cc.Sprite {
     }
   };
 
+  /**
+   * returns the encoded html used to generate the label image
+   */
   getString = (): string => this.#textElement.textContent;
 
+  /**
+   * Sets the content size / dimension of the label
+   *
+   * @param size dimensions or width of dimensions
+   * @param height optional height of dimensions
+   */
   setDimensions = (size: [number, number] | { width: number; height: number } | number, height: number): void => {
     if (typeof size === 'number') {
       this.setContentSize(size, height);
@@ -176,51 +190,101 @@ class ImageLabelImpl extends cc.Sprite {
     }
   };
 
+  /**
+   * Returns the dimensions of image label.
+   */
   getDimensions = (): object => this.getContentSize();
 
+  /**
+   * Sets the color of the image label font
+   *
+   * @param color array of either rgb or rgba
+   */
   setFontColor = (color: Color): void => {
     this.#fontColor = color;
     this.setString(this.#text);
   };
 
+  /**
+   * Sets the background color of the image label
+   *
+   * @param color array of either rgb or rgba
+   */
   setBackgroundColor = (color: Color): void => {
     this.#backgroundColor = color;
     this.setString(this.#text);
   };
 
+  /**
+   * Enable click detection for the image label
+   *
+   * @param clickHandler callback function for when the label is clicked. Instance of the
+   * ImageLabel is pass to the callback as a parameter
+   */
   setClickHandler = (clickHandler: (ImageLabelImpl) => void): void => {
     this.#clickHandler = clickHandler;
     this.#addListener();
   };
 
+  /**
+   * Toggle click listener if setClickHandlder was called
+   *
+   * @param enable whether or not the click listener is enabled
+   */
   setClickEnabled = (enable: boolean): void => {
     if (this.#listener) {
       this.#listener.setEnabled(enable);
     }
   };
 
+  /**
+   * Sets the image label (x,y) position in it's parent node
+   *
+   * @param x the X coordinate for position
+   * @param y the Y coordinate for position
+   */
   setPosition = (x: number, y: number): void => {
     this.#position = [x, y];
     super.setPosition(x, y);
   };
 
+  /**
+   * Sets the image label x position in it's parent node
+   *
+   * @param x the X coordinate for position
+   */
   setPositionX = (x: number): void => {
     this.#position[0] = x;
     super.setPositionX(x);
   };
 
+  /**
+   * Sets the image label y position in it's parent node
+   *
+   * @param y the Y coordinate for position
+   */
   setPositionY = (y: number): void => {
     this.#position[1] = y;
     super.setPositionY(y);
   };
 
-  enableShadow = (v: number, h: number, color: Color, b = 0): void => {
+  /**
+   * Enable and set text shadow for image label
+   * @param h The position of the horizontal shadow
+   * @param v The position of the vertical shadow
+   * @param color array of either rgb or rgba
+   * @param b The blur radius. Default value is 0
+   */
+  enableShadow = (h: number, v: number, color: Color, b = 0): void => {
     this.#addShadow = true;
     const colorType = color.length === 3 ? 'rgb' : 'rgba';
     this.#shadowProperty = `${v}px ${h}px ${b}px ${colorType}(${color.join(', ')})`;
     this.setString(this.#text);
   };
 
+  /**
+   * Removes text shadow from image label
+   */
   disableShadow = (): void => {
     this.#addShadow = false;
     this.#shadowProperty = null;

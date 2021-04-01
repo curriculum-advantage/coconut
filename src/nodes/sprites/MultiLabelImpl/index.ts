@@ -112,7 +112,7 @@ class MultiLabelImpl extends cc.LayerColor {
     parent = null,
     zOrder = 0,
   } = {},
-  objectParameters: { styleSyntaxes?: object; drawSymbol?: Function; reset?: Function } = {}) {
+  objectParameters: { styleSyntaxes?: object } = {}) {
     super(cc.color(255, 255, 255, 0));
     this.setAnchorPoint(...anchor);
     this.setContentSize(containerWidth, containerHeight);
@@ -240,10 +240,10 @@ class MultiLabelImpl extends cc.LayerColor {
 
       updateText = '';
 
-      for (const [index, element] of splitString.entries()) {
+      splitString.forEach((element, index) => {
         if (index >= startingSyntaxIndex && index <= endSyntaxIndex) updateText += syntax;
         updateText += `${element} `;
-      }
+      });
     }
     return updateText.trim();
   };
@@ -297,12 +297,39 @@ class MultiLabelImpl extends cc.LayerColor {
           this.#fillIns[this.#numberReplacedFillIns],
         );
         this.#numberReplacedFillIns += 1;
+      } else if (syntax.includes('TRIANGLE')) {
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style="font-size:${this.#fontSize + 3}px;">&#9651;</span>`);
       } else if (syntax.includes('ANGLE')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '    ');
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style="font-size:${this.#fontSize * 1.5}px;">&ang;</span>`);
       } else if (syntax.includes('SQRT')) {
         cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style="font-size:${this.#fontSize + 2}px">&radic;<span style='text-decoration:overline;'>`);
-        cleanedText += '</span></span>';
+          `<span style="font-size:${this.#fontSize + 2}px;">&radic;</span>
+          <span style='text-decoration:overline;'>`);
+        cleanedText += '</span>';
+      } else if (syntax.includes('SEGMENT')) {
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: flex; justify-content: center; 
+          transform: scaleX(1.8);'>&lowbar;</span>`);
+        cleanedText += '</span>';
+      } else if (syntax.includes('LINE')) {
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: inline-block;'>&harr;</span>`);
+        cleanedText += '</span>';
+      } else if (syntax.includes('VECTOR')) {
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: inline-block;'>&rarr;</span>`);
+        cleanedText += '</span>';
+      } else if (syntax.includes('ARC')) {
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+          `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: flex; 
+          transform: scaleX(1.5); justify-content: center;'>&profline;</span>`);
+        cleanedText += '</span>';
       } else cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '');
     });
     return cleanedText;
@@ -436,6 +463,7 @@ class MultiLabelImpl extends cc.LayerColor {
     position: [0, 0],
     color,
     cleanDom: this.#cleanDom,
+    verticalAlign: 'baseline',
   });
 
   /**
@@ -549,11 +577,12 @@ class MultiLabelImpl extends cc.LayerColor {
         this.#underlineLabel(this.#labels[index].getBoundingBox(), drawingSyntax.color);
       }
       if (this.#hasOtherSyntaxes) {
-        this.#objectParameters.drawSymbol(
-          drawingSyntax,
-          this.#labels[index].getBoundingBox(),
-          drawingSyntax.color,
-        );
+        const keys = Object.keys(drawingSyntax);
+        keys.forEach((key) => {
+          if (['sqrt', 'triangle', 'ang'].includes(key) && drawingSyntax[key]) {
+            this.#labels[index].setPositionY(this.#labels[index].getPositionY() - 2);
+          }
+        });
       }
     });
   };
@@ -617,7 +646,6 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#symbols = [];
     this.#drawingSyntaxes = [];
     this.#entities = [];
-    if (this.#hasOtherSyntaxes && this.#objectParameters.reset) this.#objectParameters.reset();
   };
 
   #render = (text = this.#displayedText): void => {
