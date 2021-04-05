@@ -65,10 +65,6 @@ class ImageLabelImpl extends cc.Sprite {
 
   readonly #wordSpacing;
 
-  readonly #strokeColor;
-
-  readonly #strokeWidth;
-
   readonly #anchor;
 
   readonly #containerWidth;
@@ -86,6 +82,10 @@ class ImageLabelImpl extends cc.Sprite {
   #fontColor;
 
   #backgroundColor;
+
+  #strokeColor;
+
+  #strokeWidth;
 
   #position;
 
@@ -118,7 +118,7 @@ class ImageLabelImpl extends cc.Sprite {
     textAlign = 'left',
     position = [250, 250] as Point,
     color = [0, 0, 0] as Color,
-    strokeColor = [255, 0, 0],
+    strokeColor = [0, 0, 0],
     strokeWidth = 0,
     anchor = [0.5, 0.5] as Point,
     zOrder = 0,
@@ -212,6 +212,27 @@ class ImageLabelImpl extends cc.Sprite {
    */
   setBackgroundColor = (color: Color): void => {
     this.#backgroundColor = color;
+    this.setString(this.#text);
+  };
+
+  /**
+   * Enabled text stroke
+   *
+   * @param color Stroke fontColor of the displayed text. Requires a `strokeSize` greater than 0.
+   * @param size Stroke size of the displayed text.
+   */
+  enableStroke = (color: Color, size: number): void => {
+    this.#strokeColor = color;
+    this.#strokeWidth = size;
+    this.setString(this.#text);
+  };
+
+  /**
+   * Disables text stroke
+   */
+  disableStroke = (): void => {
+    this.#strokeColor = [0, 0, 0];
+    this.#strokeWidth = 0;
     this.setString(this.#text);
   };
 

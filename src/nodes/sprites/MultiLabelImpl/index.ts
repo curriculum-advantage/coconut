@@ -1,5 +1,3 @@
-// TODO: This file needs heavy cleanup for lint and type errors. Remove all @ts-ignore in file.
-
 import {
   escapeRegExp,
   findKey,

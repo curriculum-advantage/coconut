@@ -4,10 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-## [2.1.8] - 2021-03-01
-* Can 
 
-## [2.1.8] - 2021-02-26
+## [2.1.18] - 2021-04-05
+* Add support for updating stroke after ImageLabel have been generated
+
+## [2.1.17] - 2021-04-01
+* Add support for setting font and background color to ImageLabel
+* Add ability to set ImageLabel position after creation
+* Add ability to enable text shadow to ImageLabel
+* Add the ability to update ImageLabel Dimension
+* Add the ability to add a ClickHandler to ImageLabel
+* Add the ability to disable ClickHandler on MultiLabel
+* MultiLabel now pass the MultiLabel instance to the ClickHandler 
+* MultiLabel now directly create math symbols
+
+## [2.1.8] - 2021-03-26
 * Update MultiLabel to use js private encapsulation rather than constructor encapsulation.
 * Adding text attribute to MultiLabel constructor, so you no longer have to manually call `setString` 
 * MultiLabel and ImageLabel can be created with or without the `new` keyword.
