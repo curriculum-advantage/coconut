@@ -53,142 +53,50 @@
     ]
   },
   "dependencies": {
-    "@types/lodash": "^4.14.121",
-    "core-js": "^2.6.9",
-    "detect-browser": "^4.7.0",
+    "@types/lodash": "^4.14.168",
+    "core-js": "^3.10.1",
+    "detect-browser": "^5.2.0",
     "hash-it": "^5.0.0",
     "howler": "^2.1.2",
     "html2canvas": "git+https://github.com/curriculum-advantage/html2canvas.git",
     "is_js": "^0.9.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "prando": "^5.1.0",
-    "typescript": "^3.6.3"
+    "typescript": "^4.2.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.2",
-    "@babel/core": "^7.6.2",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "@babel/preset-typescript": "^7.6.0",
-    "@types/jest": "^24.0.9",
-    "@types/node": "^11.9.5",
-    "@types/webpack": "^4.4.25",
-    "@typescript-eslint/eslint-plugin": "^2.3.1",
-    "@typescript-eslint/parser": "^2.3.1",
-    "babel-loader": "^8.0.6",
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.14",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.13.8",
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.37",
+    "@types/webpack": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^4.21.0",
+    "@typescript-eslint/parser": "^4.21.0",
+    "babel-loader": "^8.2.2",
     "babel-plugin-lodash": "^3.3.4",
     "base64-to-image": "^1.0.2",
-    "cross-env": "^6.0.0",
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-airbnb-typescript": "^5.0.0",
-    "eslint-plugin-eslint-comments": "^3.1.2",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jest": "^22.17.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-unicorn": "^12.0.1",
-    "husky": "^3.0.7",
-    "jest": "^24.9.0",
-    "lint-staged": "^9.4.0",
-    "lodash-webpack-plugin": "^0.11.5",
-    "prettier": "^1.18.2",
-    "ts-node": "^8.4.1",
-    "webpack": "^4.41.0",
-    "webpack-cli": "^3.3.9"
-  },
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint",
-      "eslint-comments",
-      "jest",
-      "promise",
-      "unicorn"
-    ],
-    "extends": [
-      "airbnb-typescript/base",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:eslint-comments/recommended",
-      "plugin:jest/recommended",
-      "plugin:promise/recommended",
-      "plugin:unicorn/recommended"
-    ],
-    "globals": {
-      "cc": true,
-      "ccui": true
-    },
-    "env": {
-      "browser": true,
-      "node": true,
-      "jest": true
-    },
-    "rules": {
-      "func-names": [
-        "error",
-        "as-needed"
-      ],
-      "no-console": [
-        "error",
-        {
-          "allow": [
-            "warn",
-            "error",
-            "assert"
-          ]
-        }
-      ],
-      "complexity": [
-        "error",
-        10
-      ],
-      "max-params": [
-        "error",
-        5
-      ],
-      "max-depth": [
-        "error",
-        4
-      ],
-      "max-statements": [
-        "error",
-        20
-      ],
-      "max-lines-per-function": [
-        "error",
-        50
-      ],
-      "max-classes-per-file": [
-        "error",
-        1
-      ],
-      "max-nested-callbacks": [
-        "error",
-        3
-      ],
-      "max-statements-per-line": [
-        "error",
-        {
-          "max": 1
-        }
-      ],
-      "unicorn/filename-case": [
-        "error",
-        {
-          "cases": {
-            "camelCase": true,
-            "pascalCase": true
-          }
-        }
-      ],
-      "max-len": [
-        "warn",
-        {
-          "code": 120
-        }
-      ],
-      "unicorn/expiring-todo-comments": "off"
-    }
+    "cross-env": "^7.0.3",
+    "eslint": "^7.23.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.4",
+    "eslint-plugin-promise": "^4.3.1",
+    "eslint-plugin-unicorn": "^29.0.0",
+    "husky": "^6.0.0",
+    "jest": "^26.6.3",
+    "lint-staged": "^10.5.4",
+    "lodash-webpack-plugin": "^0.11.6",
+    "prettier": "^2.2.1",
+    "source-map-loader": "^2.0.1",
+    "ts-node": "^9.1.1",
+    "webpack": "^5.31.0",
+    "webpack-cli": "^4.6.0"
   },
   "jest": {
     "bail": true,
@@ -206,25 +114,6 @@
     "moduleNameMapper": {
       "^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|cur)$": "<rootDir>/src/lib/mocks/FileMock.js"
     }
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/env",
-        {
-          "useBuiltIns": "usage",
-          "corejs": 2,
-          "targets": {
-            "ie": "11"
-          }
-        }
-      ],
-      "@babel/typescript"
-    ],
-    "plugins": [
-      "@babel/plugin-proposal-class-properties",
-      "@babel/proposal-object-rest-spread"
-    ]
   },
   "prettier": {
     "arrowParens": "always",

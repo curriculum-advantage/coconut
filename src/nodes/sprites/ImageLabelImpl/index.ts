@@ -103,7 +103,7 @@ class ImageLabelImpl extends cc.Sprite {
 
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
-    parent = null,
+    parent = undefined,
     text = '',
     opacity = 1,
     fontName = primaryFont,
@@ -124,7 +124,7 @@ class ImageLabelImpl extends cc.Sprite {
     zOrder = 0,
     containerWidth = 0,
     containerHeight = 0,
-    dimensions = null as Size,
+    dimensions = undefined as Size,
     backgroundColor = null,
     cleanDom = true,
   } = {}) {
@@ -161,7 +161,7 @@ class ImageLabelImpl extends cc.Sprite {
    *
    * @param text the html string used to generate the label image
    */
-  setString = (text): void => {
+  setString = (text: string): void => {
     this.#queue.enqueue(text);
     if (!this.#rendering) {
       this.#setStringFromQueue(this.#queue.dequeue());
@@ -185,7 +185,10 @@ class ImageLabelImpl extends cc.Sprite {
     } else if (Array.isArray(size)) {
       this.setContentSize(...size);
     } else if (typeof size === 'object') {
-      const { width, height: sHeight } = size;
+      const {
+        width,
+        height: sHeight,
+      } = size;
       this.setContentSize(width, sHeight);
     }
   };
@@ -248,7 +251,7 @@ class ImageLabelImpl extends cc.Sprite {
   };
 
   /**
-   * Toggle click listener if setClickHandlder was called
+   * Toggle click listener if setClickHandler was called
    *
    * @param enable whether or not the click listener is enabled
    */
@@ -308,7 +311,7 @@ class ImageLabelImpl extends cc.Sprite {
    */
   disableShadow = (): void => {
     this.#addShadow = false;
-    this.#shadowProperty = null;
+    this.#shadowProperty = undefined;
     this.setString(this.#text);
   };
 
@@ -336,7 +339,7 @@ class ImageLabelImpl extends cc.Sprite {
   };
 
   // eslint-disable-next-line max-statements
-  #generateTextSpan = (text): HTMLElement => {
+  #generateTextSpan = (text: string): HTMLElement => {
     const textElement = document.createElement('p');
 
     textElement.innerHTML = text;
@@ -352,10 +355,8 @@ class ImageLabelImpl extends cc.Sprite {
       ? `${this.#strokeWidth}px rgba(${this.#strokeColor.join(', ')})`
       : `${this.#strokeWidth}px rgb(${this.#strokeColor.join(', ')})`;
 
-    if (this.#containerWidth === 0) textElement.style.width = 'max-content';
-    else textElement.style.width = `${this.#containerWidth}px`;
-    if (this.#containerHeight === 0) textElement.style.height = 'auto';
-    else textElement.style.height = `${this.#containerHeight}px`;
+    textElement.style.width = this.#containerWidth === 0 ? 'max-content' : `${this.#containerWidth}px`;
+    textElement.style.height = this.#containerHeight === 0 ? 'auto' : `${this.#containerHeight}px`;
 
     if (this.#cleanDom) {
       textElement.style.margin = '0 auto';
@@ -388,22 +389,23 @@ class ImageLabelImpl extends cc.Sprite {
   };
 
   #generateSprite = (textElement: HTMLElement, id: number): void => {
-    this.#getCanvas(textElement).then((canvas) => {
-      if (this.#cleanDom) textElement.remove();
-      cc.textureCache.cacheImage(id, canvas);
-
-      this.#createTextSprite(cc.textureCache.getTextureForKey(id));
-      return null;
-    }).catch(() => null);
+    this.#getCanvas(textElement)
+      .then((canvas) => {
+        if (this.#cleanDom) textElement.remove();
+        cc.textureCache.cacheImage(id, canvas);
+        this.#createTextSprite(cc.textureCache.getTextureForKey(id));
+        return {};
+      })
+      .catch(() => {});
   };
 
-  #getCanvas = (textElement): Promise<HTMLCanvasElement> => html2canvas(textElement, {
+  #getCanvas = (textElement: HTMLElement): Promise<HTMLCanvasElement> => html2canvas(textElement, {
     backgroundColor: this.#backgroundColor,
     scale: 1,
     logging: false,
   });
 
-  #createTextSprite = (imageTexture): void => {
+  #createTextSprite = (imageTexture: typeof cc.TEXTURE): void => {
     this.setTexture(imageTexture);
     this.#rendering = false;
     if (!this.#queue.isEmpty()) {
@@ -417,9 +419,7 @@ class ImageLabelImpl extends cc.Sprite {
       swallowTouches: false,
       onTouchBegan: () => true,
       onTouchEnded: (event) => {
-        if (isPointOnTarget(event, this)) {
-          if (this.#clickHandler) this.#clickHandler(this);
-        }
+        if (isPointOnTarget(event, this) && this.#clickHandler) this.#clickHandler(this);
       },
     }, this);
   };

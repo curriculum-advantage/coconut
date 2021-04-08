@@ -1,0 +1,104 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": "./",
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "eslint-comments",
+    "jest",
+    "promise",
+    "unicorn"
+  ],
+  "extends": [
+    "airbnb-typescript/base",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:eslint-comments/recommended",
+    "plugin:jest/recommended",
+    "plugin:promise/recommended",
+    "plugin:unicorn/recommended"
+  ],
+  "globals": {
+    "cc": true,
+    "ccui": true
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "rules": {
+    "func-names": [
+      "error",
+      "as-needed"
+    ],
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "warn",
+          "error",
+          "assert"
+        ]
+      }
+    ],
+    "complexity": [
+      "error",
+      10
+    ],
+    "max-params": [
+      "error",
+      5
+    ],
+    "max-depth": [
+      "error",
+      4
+    ],
+    "max-statements": [
+      "error",
+      20
+    ],
+    "max-lines-per-function": [
+      "error",
+      50
+    ],
+    "max-classes-per-file": [
+      "error",
+      1
+    ],
+    "max-nested-callbacks": [
+      "error",
+      3
+    ],
+    "max-statements-per-line": [
+      "error",
+      {
+        "max": 1
+      }
+    ],
+    "unicorn/filename-case": [
+      "error",
+      {
+        "cases": {
+          "camelCase": true,
+          "pascalCase": true
+        }
+      }
+    ],
+    "max-len": [
+      "warn",
+      {
+        "code": 120
+      }
+    ],
+    "unicorn/expiring-todo-comments": "off",
+    "unicorn/no-useless-undefined": "off",
+    "@typescript-eslint/ban-types": "off",
+    "unicorn/no-null": "off"
+  }
+}
