@@ -5,8 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2021-04-05
+* Revert changes on how fractions are created by the MultiLabel
+* Migrate math syntax to the MultiLabel
+
 ## [2.1.19] - 2021-04-05
 * Update project dependencies
+
 
 ## [2.1.18] - 2021-04-05
 * Add support for updating stroke after ImageLabel have been generated

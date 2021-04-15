@@ -8,10 +8,10 @@ import {
   sub,
   sup,
 } from './helpers/superSubScripts';
-import createRect from '../../../utils/createRect';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
-import { ImageLabel } from '../ImageLabelImpl';
+import ImageLabelImpl, { ImageLabel } from '../ImageLabelImpl';
 import CreateCallableConstructor from '../../util';
+import Fraction from '../Fraction';
 import { primaryFont } from '../../../lib/constants';
 
 class MultiLabelImpl extends cc.LayerColor {
@@ -45,15 +45,9 @@ class MultiLabelImpl extends cc.LayerColor {
 
   readonly #cleanDom;
 
-  readonly #hasOtherSyntaxes;
-
-  readonly #otherSyntaxes;
-
   readonly #areaClick;
 
   readonly #defaultFillIn;
-
-  readonly #objectParameters;
 
   #numberReplacedFillIns = 0;
 
@@ -71,11 +65,11 @@ class MultiLabelImpl extends cc.LayerColor {
 
   #symbols = [];
 
-  #drawingSyntaxes = [];
-
   #previousWasShift = false;
 
   #wasClicked = false;
+
+  #offsetForFraction = false;
 
   #positionY;
 
@@ -109,8 +103,7 @@ class MultiLabelImpl extends cc.LayerColor {
     cleanDom = true,
     parent = null,
     zOrder = 0,
-  } = {},
-  objectParameters: { styleSyntaxes?: object } = {}) {
+  } = {}) {
     super(cc.color(255, 255, 255, 0));
     this.setAnchorPoint(...anchor);
     this.setContentSize(containerWidth, containerHeight);
@@ -128,7 +121,6 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#areaClick = areaClick;
     this.#clickHandler = clickHandler;
     this.#defaultFillIn = defaultFillIn;
-    this.#objectParameters = objectParameters;
 
     this.#fontSize = fontSize;
     this.#fontName = fontName;
@@ -136,17 +128,10 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#wordOffset = fontSize / wordSpace;
     this.#positionY = containerHeight - this.#lineOffset - 5;
 
-
-    this.#hasOtherSyntaxes = Object.keys(objectParameters).length > 0;
-    this.#otherSyntaxes = this.#hasOtherSyntaxes && objectParameters.styleSyntaxes
-      ? objectParameters.styleSyntaxes
-      : {};
-
     this.#browser = detect();
 
     // Current supported markup
     this.#styleSyntaxes = {
-      ...this.#otherSyntaxes,
       highlightSyntax: '[HIGHLIGHT]',
       blankSyntax: '[BLANK]',
       boldSyntax: '[BOLD]',
@@ -159,13 +144,20 @@ class MultiLabelImpl extends cc.LayerColor {
       subScriptSyntax: '[CWSUBSCRIPT]',
       shiftDownSyntax: '[SHIFTDOWN]',
       shiftUpSyntax: '[SHIFTUP]',
+      segmentSyntax: '[SEGMENT]',
+      angSyntax: '[ANGLE]',
+      arcSyntax: '[ARC]',
+      triangleSyntax: '[TRIANGLE]',
+      lineSyntax: '[LINE]',
+      sqrtSyntax: '[SQRT]',
+      vectorSyntax: '[VECTOR]',
     };
 
     this.setString(text);
     if (parent) parent.addChild(this, zOrder);
   }
 
-  setString = (text): void => {
+  setString = (text: string): void => {
     this.#displayedText = text;
     const updatedText = this.#notateStyles(text);
     this.#initiateFillIns(this.#displayedText);
@@ -182,12 +174,12 @@ class MultiLabelImpl extends cc.LayerColor {
     this.setOpacity(255);
   };
 
-  fillInBlank = (index, fillInText): void => {
+  fillInBlank = (index: number, fillInText: string): void => {
     this.#fillIns[index] = fillInText;
     this.#render();
   };
 
-  resetBlank = (index): void => {
+  resetBlank = (index: number): void => {
     this.#fillIns[index] = this.#defaultFillIn;
     this.#render();
   };
@@ -200,18 +192,18 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#wasClicked = false;
   };
 
-  setClickHandler = (handler): void => {
+  setClickHandler = (handler: () => void): void => {
     this.#clickHandler = handler;
     this.#addListener();
   };
 
-  setClickEnabled = (enable): void => {
+  setClickEnabled = (enable: boolean): void => {
     if (this.#listener) {
       this.#listener.setEnabled(enable);
     }
   };
 
-  #updateRangeValues = (unStyledText, syntax): string => {
+  #updateRangeValues = (unStyledText: string, syntax: string): string => {
     let updateText = unStyledText;
     const endSyntax = syntax.replace('[', '[/');
     const splitString = unStyledText.split(' ');
@@ -249,98 +241,155 @@ class MultiLabelImpl extends cc.LayerColor {
   /**
    * Iterate over a the list of supported styling and check a given string to see if its marked
    * for any of the supported styling.
-   * @param {string} markText the marked up text to check.
-   * @returns {object} an objected containing all the styling to be applied to the marked up text.
+   * @param markText the marked up text to check.
+   * @returns object an objected containing all the styling to be applied to the marked up text.
    */
-  #getStyling = (markText): object => {
+  #getStyling = (markText: string): Record<string, boolean> => {
     const styles = {};
-    ObjectValues(this.#styleSyntaxes).forEach((syntax) => {
-      if (markText.includes(syntax)) {
-        styles[findKey(this.#styleSyntaxes, (o) => o === syntax)] = true;
-      }
-    });
+    ObjectValues(this.#styleSyntaxes)
+      .forEach((syntax) => {
+        if (markText.includes(syntax)) {
+          styles[findKey(this.#styleSyntaxes, (o) => o === syntax)] = true;
+        }
+      });
     return styles;
   };
 
   /**
    * Iterate over the list of style syntaxes and marked up the specified text with each existing
    * styling
-   * @param {string} unmarkText the text to be marked up for styling prior to rendering
-   * @returns {string} the marked up text to be styled prior to rendering
+   * @param unmarkText the text to be marked up for styling prior to rendering
+   * @returns string the marked up text to be styled prior to rendering
    */
-  #notateStyles = (unmarkText): string => {
+  #notateStyles = (unmarkText: string): string => {
     let updatedText = unmarkText;
-    ObjectValues(this.#styleSyntaxes).forEach((syntax) => {
-      if (updatedText.includes(syntax)) {
-        const endSyntax = syntax.replace('[', '[/');
-        while (updatedText.includes(endSyntax)) {
-          updatedText = this.#updateRangeValues(updatedText, syntax);
+    ObjectValues(this.#styleSyntaxes)
+      .forEach((syntax) => {
+        if (updatedText.includes(syntax)) {
+          const endSyntax = syntax.replace('[', '[/');
+          while (updatedText.includes(endSyntax)) {
+            updatedText = this.#updateRangeValues(updatedText, syntax);
+          }
         }
-      }
-    });
+      });
     return updatedText;
+  };
+
+  #updateForBlankLines = (syntax: string, cleanedText: string): string => {
+    if (syntax === this.#styleSyntaxes.blankSyntax && cleanedText.includes(syntax)) {
+      this.#numberReplacedFillIns += 1;
+      return cleanedText.replace(
+        new RegExp(escapeRegExp(syntax), 'g'),
+        this.#fillIns[this.#numberReplacedFillIns],
+      );
+    }
+    return cleanedText;
+  };
+
+  #updateForTriangle = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.triangleSyntax && syntax === this.#styleSyntaxes.triangleSyntax) {
+      return cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        `<span style="font-size:${this.#fontSize + 3}px;">&#9651;</span>`);
+    }
+    return cleanedText;
+  };
+
+  #updateForAngle = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.angSyntax && syntax === this.#styleSyntaxes.angSyntax) {
+      return cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        `<span style="font-size:${this.#fontSize * 1.5}px;">&ang;</span>`);
+    }
+    return cleanedText;
+  };
+
+  #updateForSqrtRoot = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.sqrtSyntax && syntax === this.#styleSyntaxes.sqrtSyntax) {
+      return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        `<span style="font-size:${this.#fontSize}px;">&radic;</span>
+          <span style='text-decoration:overline;'>`)}</span>`;
+    }
+    return cleanedText;
+  };
+
+  #updateForSegment = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.segmentSyntax && syntax === this.#styleSyntaxes.segmentSyntax) {
+      return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        '<span style=\'text-decoration: overline;\'>')}</span>`;
+    }
+    return cleanedText;
+  };
+
+  #updateForUnderline = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.underlineSyntax && syntax === this.#styleSyntaxes.underlineSyntax) {
+      return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        '<span style=\'text-decoration: underline;\'>')}</span>`;
+    }
+    return cleanedText;
+  };
+
+  #updateForLine = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.lineSyntax && syntax === this.#styleSyntaxes.lineSyntax) {
+      return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: inline-block;'>&harr;</span>`)}</span>`;
+    }
+    return cleanedText;
+  };
+
+  #updateForVector = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.vectorSyntax && syntax === this.#styleSyntaxes.vectorSyntax) {
+      return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: inline-block;'>&rarr;</span>`)}</span>`;
+    }
+    return cleanedText;
+  };
+
+  #updateForArc = (syntax: string, cleanedText: string): string => {
+    if (this.#styleSyntaxes.arcSyntax && syntax === this.#styleSyntaxes.arcSyntax) {
+      return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
+        `<span style='display: flex; flex-direction: column'>
+          <span style='font-size: ${this.#fontSize + 2}px; display: flex; 
+          transform: scaleX(1.5); justify-content: center;'>&profline;</span>`)}</span>`;
+    }
+    return cleanedText;
   };
 
   /**
    * Remove all the markup from the specified string
    * @param markText the string with all the marking for the supported styling.
-   * @returns {string} the string without the styling markup
+   * @returns string the string without the styling markup
    */
-  #cleanText = (markText): string => {
+  #cleanText = (markText: string): string => {
     let cleanedText = markText;
-    ObjectValues(this.#styleSyntaxes).forEach((syntax) => {
-      if (syntax === '[BLANK]' && cleanedText.includes(syntax)) {
-        cleanedText = cleanedText.replace(
-          new RegExp(escapeRegExp(syntax), 'g'),
-          this.#fillIns[this.#numberReplacedFillIns],
-        );
-        this.#numberReplacedFillIns += 1;
-      } else if (syntax.includes('TRIANGLE')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style="font-size:${this.#fontSize + 3}px;">&#9651;</span>`);
-      } else if (syntax.includes('ANGLE')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style="font-size:${this.#fontSize * 1.5}px;">&ang;</span>`);
-      } else if (syntax.includes('SQRT')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style="font-size:${this.#fontSize + 2}px;">&radic;</span>
-          <span style='text-decoration:overline;'>`);
-        cleanedText += '</span>';
-      } else if (syntax.includes('SEGMENT')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style='display: flex; flex-direction: column'>
-          <span style='font-size: ${this.#fontSize + 2}px; display: flex; justify-content: center; 
-          transform: scaleX(1.8);'>&lowbar;</span>`);
-        cleanedText += '</span>';
-      } else if (syntax.includes('LINE')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style='display: flex; flex-direction: column'>
-          <span style='font-size: ${this.#fontSize + 2}px; display: inline-block;'>&harr;</span>`);
-        cleanedText += '</span>';
-      } else if (syntax.includes('VECTOR')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style='display: flex; flex-direction: column'>
-          <span style='font-size: ${this.#fontSize + 2}px; display: inline-block;'>&rarr;</span>`);
-        cleanedText += '</span>';
-      } else if (syntax.includes('ARC')) {
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
-          `<span style='display: flex; flex-direction: column'>
-          <span style='font-size: ${this.#fontSize + 2}px; display: flex; 
-          transform: scaleX(1.5); justify-content: center;'>&profline;</span>`);
-        cleanedText += '</span>';
-      } else cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '');
-    });
+    ObjectValues(this.#styleSyntaxes)
+      .forEach((syntax) => {
+        cleanedText = this.#updateForBlankLines(syntax, cleanedText);
+        cleanedText = this.#updateForTriangle(syntax, cleanedText);
+        cleanedText = this.#updateForAngle(syntax, cleanedText);
+        cleanedText = this.#updateForSqrtRoot(syntax, cleanedText);
+        cleanedText = this.#updateForSegment(syntax, cleanedText);
+        cleanedText = this.#updateForUnderline(syntax, cleanedText);
+        cleanedText = this.#updateForLine(syntax, cleanedText);
+        cleanedText = this.#updateForVector(syntax, cleanedText);
+        cleanedText = this.#updateForArc(syntax, cleanedText);
+        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '');
+      });
     return cleanedText;
   };
 
   #breakLine = (): void => {
     this.#positionX = 0;
-    this.#positionY -= this.#lineOffset;
+    if (this.#offsetForFraction) {
+      this.#currentLine.forEach((label) => label.setPositionY(label.getPositionY() - (this.#lineOffset / 2)));
+    }
+    this.#positionY -= (this.#lineOffset + (this.#offsetForFraction ? this.#lineOffset : 0));
     this.#lines.push(this.#currentLine.slice());
     this.#currentLine = [];
+    this.#offsetForFraction = false;
   };
 
-  #concat = (label, changeY = true): void => {
+  #concat = (label: ImageLabelImpl, changeY = true): void => {
     const previousLabel = this.#currentLine.length > 0
       ? this.#currentLine[this.#currentLine.length - 1]
       : this.#labels[this.#labels.length - 1];
@@ -364,14 +413,14 @@ class MultiLabelImpl extends cc.LayerColor {
     if (changeY) label.setPositionY(this.#positionY);
   };
 
-  #shouldBreakLine = (width, hasLinebreak): boolean => this.#positionX + width > this.#containerWidth
+  #shouldBreakLine = (width: number, hasLinebreak: boolean): boolean => this.#positionX + width > this.#containerWidth
     || hasLinebreak;
 
-  #checkWidth = (width, hasLinebreak): void => {
+  #checkWidth = (width: number, hasLinebreak: boolean): void => {
     if (this.#shouldBreakLine(width, hasLinebreak)) this.#breakLine();
   };
 
-  #offsetForScript = (label, hasSubscript, hasSuperScript): boolean => {
+  #offsetForScript = (label: ImageLabelImpl, hasSubscript: boolean, hasSuperScript: boolean): boolean => {
     const shouldUpdateFontSize = hasSubscript || hasSuperScript;
     if (shouldUpdateFontSize) {
       label.setFontSize(this.#fontSize * 0.6);
@@ -392,7 +441,7 @@ class MultiLabelImpl extends cc.LayerColor {
    * @param shouldShiftUp flag for whether the label should be shifted up
    * @param shouldShiftDown flag for whether the label should be shifed down
    */
-  #shift = (label, shouldShiftUp, shouldShiftDown): void => {
+  #shift = (label: ImageLabelImpl, shouldShiftUp: boolean, shouldShiftDown: boolean): void => {
     this.#previousWasShift = false;
     if (shouldShiftUp || shouldShiftDown) {
       const shiftDirection = shouldShiftUp ? 1 : -1;
@@ -402,21 +451,31 @@ class MultiLabelImpl extends cc.LayerColor {
     }
   };
 
-  #shouldOffsetBold = (bold): boolean => bold && this.#browser
+  #shouldOffsetBold = (bold: boolean): boolean => bold && this.#browser
     && (this.#browser.name === 'ie' || this.#browser.name === 'edge');
 
   /**
    * Position a specific label by default starting at the top left corner in sequence lines and
    * rows in order to fix the specified node dimensions.
-   * @param {cc.LabelTTF} label the label to be position
-   * @param {object} styling object containing the label styling.
+   * @param label the label to be position
+   * @param styling object containing the label styling.
    */
-  #setDefaultPosition = (label, styling): void => {
+  #setDefaultPosition = (label: ImageLabelImpl, styling: Record<string, boolean>): void => {
     const { width } = label;
-    this.#checkWidth(width, styling.breakSyntax);
-    if (styling.concatSyntax) this.#concat(label);
-    else {
-      if (this.#shouldOffsetBold(styling.boldSyntax)) {
+    const {
+      breakSyntax,
+      shouldShiftDown,
+      boldSyntax,
+      superScriptSyntax,
+      concatSyntax,
+      subScriptSyntax,
+      shiftUpSyntax,
+    } = styling;
+    this.#checkWidth(width, breakSyntax);
+    if (concatSyntax) {
+      this.#concat(label);
+    } else {
+      if (this.#shouldOffsetBold(boldSyntax)) {
         label.setDimensions(
           label.getBoundingBox().width,
           label.getBoundingBox().height + (this.#fontSize * 0.24),
@@ -424,13 +483,13 @@ class MultiLabelImpl extends cc.LayerColor {
       }
       label.setPosition(this.#positionX, this.#positionY);
     }
-    this.#offsetForScript(label, styling.subScriptSyntax, styling.superScriptSyntax);
-    this.#shift(label, styling.shiftUpSyntax, styling.shouldShiftDown);
+    this.#offsetForScript(label, subScriptSyntax, superScriptSyntax);
+    this.#shift(label, shiftUpSyntax, shouldShiftDown);
     this.#currentLine.push(label);
     this.#positionX += width + this.#wordOffset;
   };
 
-  #formatSuperSubScript = (text): string => {
+  #formatSuperSubScript = (text: string): string => {
     let updatedText = text;
     if (updatedText.includes('[SUBSCRIPT]') || updatedText.includes('[SUPERSCRIPT]')) {
       const syntax = updatedText.includes('[SUBSCRIPT]') ? '[SUBSCRIPT]' : '[SUPERSCRIPT]';
@@ -449,7 +508,8 @@ class MultiLabelImpl extends cc.LayerColor {
     return updatedText;
   };
 
-  #createTextLabel = (labelText, labelWeight, labelStyle, color, display = 'flex'): typeof cc.Sprite => new ImageLabel({
+  // eslint-disable-next-line max-len
+  #createTextLabel = (labelText: string, labelWeight: string, labelStyle: FontStyle, color: Color, display = 'flex'): typeof cc.Sprite => new ImageLabel({
     parent: this,
     text: labelText,
     fontSize: this.#fontSize,
@@ -471,63 +531,61 @@ class MultiLabelImpl extends cc.LayerColor {
    * @param styleFontWeight the label font weight
    * @param styleFontStyle the label font style
    * @param color the color of the fraction
-   * @returns {ImageLabel}
+   * @returns {Fraction}
    */
-  #getFractionLabel = (text, styleFontWeight, styleFontStyle, color): typeof cc.Node => {
+  #getFractionLabel = (text: string, styleFontWeight: string, styleFontStyle: FontStyle, color: Color): Fraction => {
     let fraction;
-    let fText = text.replace(new RegExp('_', 'g'), ' ').split('|');
+    let fText = text.replace(new RegExp('_', 'g'), ' ')
+      .split('|');
     fText = fText.map((value) => this.#formatSuperSubScript(value));
-    if (fText.length === 3) {
-      fraction = `${fText[0]}<sup>${fText[1]}</sup>&frasl;<sub>${fText[2]}</sub>`;
-    } else fraction = `<sup>${fText[0]}</sup>&frasl;<sub>${fText[1]}</sub>`;
+    fraction = fText.length === 3 ? {
+      whole: fText[0],
+      numerator: fText[1],
+      denominator: fText[2],
+    } : {
+      numerator: fText[0],
+      denominator: fText[1],
+    };
+    fraction = {
+      ...fraction,
+      color,
+      fontWeight: styleFontWeight,
+      fontStyle: styleFontStyle,
+      fontSize: this.#fontSize,
+      cleanDom: this.#cleanDom,
+    };
 
-    return this.#createTextLabel(fraction, styleFontWeight, styleFontStyle, color, 'block');
+    const fractionLabel = new Fraction(fraction);
+    this.addChild(fractionLabel);
+    this.#offsetForFraction = true;
+    return fractionLabel;
   };
 
-  #getOtherDrawSyntaxes = (styling = {}): object => {
-    const additionalSyntaxes = {};
-    Object.getOwnPropertyNames(this.#otherSyntaxes).forEach((syntax) => {
-      additionalSyntaxes[syntax.replace('Syntax', '')] = styling[syntax];
-    });
-
-    return additionalSyntaxes;
-  };
-
-  #checkForChildLevelSyntax = (drawObject, styling): void => {
-    if (this.#hasOtherSyntaxes) Object.assign(drawObject, this.#getOtherDrawSyntaxes(styling));
-  };
-
-  #createStyledLabel = (styling, text): { styleFontStyle; color; textLabel } => {
+  #createStyledLabel = (styling: Record<string, boolean>, text: string): ImageLabelImpl => {
     const styleFontWeight = styling.boldSyntax ? 900 : this.#fontWeight;
     const styleFontStyle = styling.italicSyntax ? 'italic' : this.#fontStyle;
     const color = styling.highlightSyntax ? this.#fontColorHighlight : this.#fontColorPrimary;
     let labelText = this.#formatSuperSubScript(text);
-    labelText = styling.blankSyntax ? labelText : labelText.replace(/_/g, ' ');
+    labelText = styling.blankSyntax ? labelText : labelText.replace(/_/g, '&nbsp;');
     const textLabel = styling.fractionSyntax
       ? this.#getFractionLabel(labelText, styleFontWeight, styleFontStyle, color)
       : this.#createTextLabel(labelText, styleFontWeight, styleFontStyle, color);
 
     if (textLabel.setDimensions) {
-      const { width, height } = textLabel.getContentSize();
+      const {
+        width,
+        height,
+      } = textLabel.getContentSize();
       textLabel.setDimensions(width, height + 2);
     }
-    return { styleFontStyle, color, textLabel };
+    return textLabel;
   };
 
-  #createAndAddLabel = (text): void => {
+  #createAndAddLabel = (text: string): void => {
     const styling = this.#getStyling(text);
     this.#cleanDisplayedText = this.#cleanText(text);
 
-    const { styleFontStyle, color, textLabel } = this.#createStyledLabel(styling, this.#cleanDisplayedText);
-
-    const drawObject = {
-      // @ts-ignore
-      underline: styling.underlineSyntax,
-      color,
-      styleFontStyle,
-    };
-    this.#checkForChildLevelSyntax(drawObject, styling);
-    this.#drawingSyntaxes.push(drawObject);
+    const textLabel = this.#createStyledLabel(styling, this.#cleanDisplayedText);
 
     this.#setDefaultPosition(textLabel, styling);
     this.#labels.push(textLabel);
@@ -536,52 +594,15 @@ class MultiLabelImpl extends cc.LayerColor {
   #setHorizontalPosition = (): void => {
     this.#lines.forEach((line) => {
       const lastWordInLine = line[line.length - 1];
-      const { width, x } = lastWordInLine.getBoundingBox();
+      const {
+        width,
+        x,
+      } = lastWordInLine.getBoundingBox();
       const offset = (this.#containerWidth - (x + width)) / (this.#horizontalAlignment === 'center' ? 2 : 1);
 
       line.forEach((word) => {
         word.setPositionX(word.getPositionX() + offset);
       });
-    });
-  };
-
-  /**
-   * Draw a line under the at a specified location
-   *
-   * @param {object} the bounding box of the label being used as the anchor point.
-   *
-   * @param {array} color the color of the text decoration.
-   */
-  #underlineLabel = ({ x, y, width }, color): void => {
-    let yOffset = 3;
-    if (this.#browser.name === 'ie' || this.#browser.name === 'edge') yOffset = 0;
-    const underline = createRect({
-      parent: this,
-      position: [x - 2, y + yOffset],
-      size: [width + 3, this.#fontSize * 0.05],
-      color: [...color, 255],
-    });
-    underline.setAnchorPoint(0, 0);
-    this.#entities.push(underline);
-  };
-
-  /**
-   * Called after the adjusting the labels positioning. Draw the marked syntaxes in the proper
-   * locations.
-   */
-  #addAndPositionDrawingMarkup = (): void => {
-    this.#drawingSyntaxes.forEach((drawingSyntax, index) => {
-      if (drawingSyntax.underline) {
-        this.#underlineLabel(this.#labels[index].getBoundingBox(), drawingSyntax.color);
-      }
-      if (this.#hasOtherSyntaxes) {
-        const keys = Object.keys(drawingSyntax);
-        keys.forEach((key) => {
-          if (['sqrt', 'triangle', 'ang'].includes(key) && drawingSyntax[key]) {
-            this.#labels[index].setPositionY(this.#labels[index].getPositionY() - 2);
-          }
-        });
-      }
     });
   };
 
@@ -623,7 +644,7 @@ class MultiLabelImpl extends cc.LayerColor {
   };
 
   // create default blank underscore strings for every fill-in-blank formatting syntax found
-  #initiateFillIns = (text): void => {
+  #initiateFillIns = (text: string): void => {
     const regExp = new RegExp(escapeRegExp(this.#styleSyntaxes.blankSyntax), 'g');
     const fillInCount = (text.match(regExp) || []).length;
     this.#fillIns = new Array(fillInCount).fill(this.#defaultFillIn);
@@ -634,6 +655,7 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#numberReplacedFillIns = 0;
     this.#positionY = this.#containerHeight - this.#lineOffset - 5;
     this.#previousWasShift = false;
+    this.#offsetForFraction = false;
     this.#labels.forEach((label) => label.removeFromParent());
     this.#symbols.forEach((symbol) => symbol.removeFromParent());
     this.#entities.forEach((entity) => entity.removeFromParent());
@@ -642,18 +664,17 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#lines = [];
     this.#labels = [];
     this.#symbols = [];
-    this.#drawingSyntaxes = [];
     this.#entities = [];
   };
 
   #render = (text = this.#displayedText): void => {
     this.#reset();
-    text.split(' ').forEach((string) => this.#createAndAddLabel(string));
+    text.split(' ')
+      .forEach((string) => this.#createAndAddLabel(string));
     this.#lines.push(this.#currentLine.slice());
     this.#currentLine = [];
     if (this.#horizontalAlignment !== 'left') this.#setHorizontalPosition();
     this.#reposition();
-    this.#addAndPositionDrawingMarkup();
   };
 }
 

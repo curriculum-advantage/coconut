@@ -1,3 +1,4 @@
+import { join } from 'path';
 import webpack from 'webpack';
 
 const config: webpack.Configuration = {
@@ -11,13 +12,13 @@ const config: webpack.Configuration = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.(?:j|t)s$/,
+        include: join(`${__dirname}/../../src`),
         loader: 'babel-loader',
-      },
-      {
-        test: /\.js$/,
-        use: ['source-map-loader'],
-        enforce: 'pre',
+        options: {
+          presets: ['@babel/preset-env', '@babel/typescript'],
+          plugins: ['@babel/plugin-proposal-class-properties', '@babel/proposal-object-rest-spread'],
+        },
       },
     ],
   },

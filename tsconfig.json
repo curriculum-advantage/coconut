@@ -12,12 +12,12 @@
     "outDir": "dist/",
     // Modern browser support.
     "target": "es6",
-    /* Additional lint rules */
 
-    "forceConsistentCasingInFileNames": false,
-    "noImplicitReturns": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    /* Additional lint rules */
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
     "src",

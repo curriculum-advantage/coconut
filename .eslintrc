@@ -11,8 +11,7 @@
     "@typescript-eslint",
     "eslint-comments",
     "jest",
-    "promise",
-    "unicorn"
+    "promise"
   ],
   "extends": [
     "airbnb-typescript/base",
@@ -20,8 +19,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:eslint-comments/recommended",
     "plugin:jest/recommended",
-    "plugin:promise/recommended",
-    "plugin:unicorn/recommended"
+    "plugin:promise/recommended"
   ],
   "globals": {
     "cc": true,
@@ -95,10 +93,6 @@
       {
         "code": 120
       }
-    ],
-    "unicorn/expiring-todo-comments": "off",
-    "unicorn/no-useless-undefined": "off",
-    "@typescript-eslint/ban-types": "off",
-    "unicorn/no-null": "off"
+    ]
   }
 }
