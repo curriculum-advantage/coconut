@@ -51,8 +51,6 @@ class ImageLabelImpl extends cc.Sprite {
 
   readonly #fontName;
 
-  readonly #fontSize;
-
   readonly #horizontalAlign;
 
   readonly #verticalAlign;
@@ -84,6 +82,8 @@ class ImageLabelImpl extends cc.Sprite {
   #onLoadCompleteCallback;
 
   #text;
+
+  #fontSize;
 
   #textElement;
 
@@ -219,6 +219,16 @@ class ImageLabelImpl extends cc.Sprite {
    */
   setFontColor = (color: Color): void => {
     this.#fontColor = color;
+    this.setString(this.#text);
+  };
+
+  /**
+   * Sets the font size of the image label
+   *
+   * @param fontSize the label text font size
+   */
+  setFontSize = (fontSize: number): void => {
+    this.#fontSize = fontSize;
     this.setString(this.#text);
   };
 
