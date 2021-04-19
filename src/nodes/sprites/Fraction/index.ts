@@ -21,6 +21,8 @@ class Fraction extends cc.Node {
 
   readonly #fontStyle;
 
+  readonly #onLoadComplete;
+
   #adjustedFontSize;
 
   #width = 0;
@@ -38,6 +40,7 @@ class Fraction extends cc.Node {
     fontStyle = 'normal' as FontStyle,
     color = [0, 0, 0] as Color,
     cleanDom = true,
+    onLoadComplete = null,
   } = {}) {
     super();
     this.#whole = whole;
@@ -49,6 +52,7 @@ class Fraction extends cc.Node {
     this.#fontSize = fontSize;
     this.#adjustedFontSize = fontSize;
     this.#cleanDom = cleanDom;
+    this.#onLoadComplete = onLoadComplete;
 
     // @ts-ignore
     pipe(
@@ -79,6 +83,7 @@ class Fraction extends cc.Node {
     fontStyle: this.#fontStyle,
     fontWeight: this.#fontWeight,
     fontSize: this.#adjustedFontSize,
+    onLoadComplete: this.#onLoadComplete,
     verticalAlign: containsSuperScript(text) ? 'flex-end' : 'flex-start',
   });
 

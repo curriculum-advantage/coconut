@@ -1,13 +1,6 @@
-import {
-  escapeRegExp,
-  findKey,
-  values as ObjectValues,
-} from 'lodash';
+import { escapeRegExp, findKey, values as ObjectValues } from 'lodash';
 import { detect } from 'detect-browser';
-import {
-  sub,
-  sup,
-} from './helpers/superSubScripts';
+import { sub, sup } from './helpers/superSubScripts';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
 import ImageLabelImpl, { ImageLabel } from '../ImageLabelImpl';
 import CreateCallableConstructor from '../../util';
@@ -49,6 +42,8 @@ class MultiLabelImpl extends cc.LayerColor {
 
   readonly #defaultFillIn;
 
+  readonly #onLoadCompleteCallback;
+
   #numberReplacedFillIns = 0;
 
   #fillIns = [];
@@ -64,6 +59,8 @@ class MultiLabelImpl extends cc.LayerColor {
   #entities = [];
 
   #symbols = [];
+
+  #loadingPromises = [];
 
   #previousWasShift = false;
 
@@ -103,6 +100,7 @@ class MultiLabelImpl extends cc.LayerColor {
     cleanDom = true,
     parent = null,
     zOrder = 0,
+    onLoadComplete = undefined,
   } = {}) {
     super(cc.color(255, 255, 255, 0));
     this.setAnchorPoint(...anchor);
@@ -127,6 +125,8 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#lineOffset = fontSize * lineHeight;
     this.#wordOffset = fontSize / wordSpace;
     this.#positionY = containerHeight - this.#lineOffset - 5;
+
+    this.#onLoadCompleteCallback = onLoadComplete;
 
     this.#browser = detect();
 
@@ -362,19 +362,18 @@ class MultiLabelImpl extends cc.LayerColor {
    */
   #cleanText = (markText: string): string => {
     let cleanedText = markText;
-    ObjectValues(this.#styleSyntaxes)
-      .forEach((syntax) => {
-        cleanedText = this.#updateForBlankLines(syntax, cleanedText);
-        cleanedText = this.#updateForTriangle(syntax, cleanedText);
-        cleanedText = this.#updateForAngle(syntax, cleanedText);
-        cleanedText = this.#updateForSqrtRoot(syntax, cleanedText);
-        cleanedText = this.#updateForSegment(syntax, cleanedText);
-        cleanedText = this.#updateForUnderline(syntax, cleanedText);
-        cleanedText = this.#updateForLine(syntax, cleanedText);
-        cleanedText = this.#updateForVector(syntax, cleanedText);
-        cleanedText = this.#updateForArc(syntax, cleanedText);
-        cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '');
-      });
+    ObjectValues(this.#styleSyntaxes).forEach((syntax) => {
+      cleanedText = this.#updateForBlankLines(syntax, cleanedText);
+      cleanedText = this.#updateForTriangle(syntax, cleanedText);
+      cleanedText = this.#updateForAngle(syntax, cleanedText);
+      cleanedText = this.#updateForSqrtRoot(syntax, cleanedText);
+      cleanedText = this.#updateForSegment(syntax, cleanedText);
+      cleanedText = this.#updateForUnderline(syntax, cleanedText);
+      cleanedText = this.#updateForLine(syntax, cleanedText);
+      cleanedText = this.#updateForVector(syntax, cleanedText);
+      cleanedText = this.#updateForArc(syntax, cleanedText);
+      cleanedText = cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'), '');
+    });
     return cleanedText;
   };
 
@@ -508,18 +507,20 @@ class MultiLabelImpl extends cc.LayerColor {
     return updatedText;
   };
 
-  // eslint-disable-next-line max-len
-  #createTextLabel = (labelText: string, labelWeight: string, labelStyle: FontStyle, color: Color, display = 'flex'): typeof cc.Sprite => new ImageLabel({
-    parent: this,
+  #createTextLabel = (labelText: string,
+    labelWeight: string,
+    labelStyle: FontStyle,
+    color: Color,
+    onLoadComplete: (value: unknown) => void): typeof cc.Sprite => new ImageLabel({
+    color,
+    onLoadComplete,
     text: labelText,
-    fontSize: this.#fontSize,
-    display,
-    fontName: this.#fontName,
-    fontWeight: labelWeight,
-    fontStyle: labelStyle,
     anchor: [0, 0],
     position: [0, 0],
-    color,
+    fontStyle: labelStyle,
+    fontWeight: labelWeight,
+    fontSize: this.#fontSize,
+    fontName: this.#fontName,
     cleanDom: this.#cleanDom,
     verticalAlign: 'baseline',
   });
@@ -531,9 +532,14 @@ class MultiLabelImpl extends cc.LayerColor {
    * @param styleFontWeight the label font weight
    * @param styleFontStyle the label font style
    * @param color the color of the fraction
+   * @param resolve async callback method
    * @returns {Fraction}
    */
-  #getFractionLabel = (text: string, styleFontWeight: string, styleFontStyle: FontStyle, color: Color): Fraction => {
+  #getFractionLabel = (text: string,
+    styleFontWeight: string,
+    styleFontStyle: FontStyle,
+    color: Color,
+    resolve: (value: unknown) => void): Fraction => {
     let fraction;
     let fText = text.replace(new RegExp('_', 'g'), ' ')
       .split('|');
@@ -553,23 +559,25 @@ class MultiLabelImpl extends cc.LayerColor {
       fontStyle: styleFontStyle,
       fontSize: this.#fontSize,
       cleanDom: this.#cleanDom,
+      onLoadComplete: resolve,
     };
 
     const fractionLabel = new Fraction(fraction);
-    this.addChild(fractionLabel);
     this.#offsetForFraction = true;
     return fractionLabel;
   };
 
-  #createStyledLabel = (styling: Record<string, boolean>, text: string): ImageLabelImpl => {
+  #createStyledLabel = (styling: Record<string, boolean>,
+    text: string,
+    resolve: (value: unknown) => void): ImageLabelImpl => {
     const styleFontWeight = styling.boldSyntax ? 900 : this.#fontWeight;
     const styleFontStyle = styling.italicSyntax ? 'italic' : this.#fontStyle;
     const color = styling.highlightSyntax ? this.#fontColorHighlight : this.#fontColorPrimary;
     let labelText = this.#formatSuperSubScript(text);
     labelText = styling.blankSyntax ? labelText : labelText.replace(/_/g, '&nbsp;');
     const textLabel = styling.fractionSyntax
-      ? this.#getFractionLabel(labelText, styleFontWeight, styleFontStyle, color)
-      : this.#createTextLabel(labelText, styleFontWeight, styleFontStyle, color);
+      ? this.#getFractionLabel(labelText, styleFontWeight, styleFontStyle, color, resolve)
+      : this.#createTextLabel(labelText, styleFontWeight, styleFontStyle, color, resolve);
 
     if (textLabel.setDimensions) {
       const {
@@ -581,11 +589,11 @@ class MultiLabelImpl extends cc.LayerColor {
     return textLabel;
   };
 
-  #createAndAddLabel = (text: string): void => {
+  #createAndAddLabel = (text: string, resolve: (value: unknown) => void): void => {
     const styling = this.#getStyling(text);
     this.#cleanDisplayedText = this.#cleanText(text);
 
-    const textLabel = this.#createStyledLabel(styling, this.#cleanDisplayedText);
+    const textLabel = this.#createStyledLabel(styling, this.#cleanDisplayedText, resolve);
 
     this.#setDefaultPosition(textLabel, styling);
     this.#labels.push(textLabel);
@@ -669,8 +677,17 @@ class MultiLabelImpl extends cc.LayerColor {
 
   #render = (text = this.#displayedText): void => {
     this.#reset();
-    text.split(' ')
-      .forEach((string) => this.#createAndAddLabel(string));
+    text.split(' ').forEach((string) => {
+      const generateImageLabel = new Promise((resolve) => {
+        this.#createAndAddLabel(string, resolve);
+      });
+      this.#loadingPromises.push(generateImageLabel);
+    });
+    Promise.all(this.#loadingPromises).then((result) => {
+      result.forEach((image) => this.addChild(image));
+      if (this.#onLoadCompleteCallback) this.#onLoadCompleteCallback(this);
+      return undefined;
+    }).catch(null);
     this.#lines.push(this.#currentLine.slice());
     this.#currentLine = [];
     if (this.#horizontalAlignment !== 'left') this.#setHorizontalPosition();

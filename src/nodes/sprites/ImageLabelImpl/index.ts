@@ -34,6 +34,8 @@ import Queue from '../../../utils/Queue';
  *  options.containerHeight if set.
  *  @param options.backgroundColor sets a fontColor of the sprite background
  *  @param options.cleanDom flag for cleaning the dom by removing the generated html elements
+ *  @param options.onLoadComplete callback function for when the image have been created
+ *  @oaram options.isVisible default visibility
  * @example
  *
  * this.text = new ImageLabel({
@@ -75,6 +77,12 @@ class ImageLabelImpl extends cc.Sprite {
 
   readonly #cleanDom;
 
+  #queue = new Queue();
+
+  #rendering = false;
+
+  #onLoadCompleteCallback;
+
   #text;
 
   #textElement;
@@ -93,13 +101,11 @@ class ImageLabelImpl extends cc.Sprite {
 
   #clickHandler;
 
-  #queue = new Queue();
-
-  #rendering = false;
-
   #addShadow;
 
   #shadowProperty;
+
+  #isVisible;
 
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
@@ -127,6 +133,8 @@ class ImageLabelImpl extends cc.Sprite {
     dimensions = undefined as Size,
     backgroundColor = null,
     cleanDom = true,
+    onLoadComplete = undefined,
+    isVisible = true,
   } = {}) {
     super();
 
@@ -151,6 +159,8 @@ class ImageLabelImpl extends cc.Sprite {
     this.#display = display;
     this.#backgroundColor = backgroundColor;
     this.#cleanDom = cleanDom;
+    this.#onLoadCompleteCallback = onLoadComplete;
+    this.#isVisible = isVisible;
 
     this.setString(text);
     if (parent) parent.addChild(this, this.#zOrder);
@@ -160,8 +170,12 @@ class ImageLabelImpl extends cc.Sprite {
    * Sets the label string
    *
    * @param text the html string used to generate the label image
+   *
+   * @param onLoadComplete optional callback function on render complete
    */
-  setString = (text: string): void => {
+  setString = (text: string, onLoadComplete = this.#onLoadCompleteCallback): void => {
+    this.#onLoadCompleteCallback = onLoadComplete;
+    this.#isVisible = true;
     this.#queue.enqueue(text);
     if (!this.#rendering) {
       this.#setStringFromQueue(this.#queue.dequeue());
@@ -196,7 +210,7 @@ class ImageLabelImpl extends cc.Sprite {
   /**
    * Returns the dimensions of image label.
    */
-  getDimensions = (): object => this.getContentSize();
+  getDimensions = (): Record<string, number> => this.getContentSize();
 
   /**
    * Sets the color of the image label font
@@ -406,8 +420,10 @@ class ImageLabelImpl extends cc.Sprite {
   });
 
   #createTextSprite = (imageTexture: typeof cc.TEXTURE): void => {
+    this.setVisible(this.#isVisible);
     this.setTexture(imageTexture);
     this.#rendering = false;
+    if (this.#onLoadCompleteCallback) this.#onLoadCompleteCallback(this);
     if (!this.#queue.isEmpty()) {
       this.#setStringFromQueue(this.#queue.dequeue());
     }
