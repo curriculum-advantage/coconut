@@ -691,10 +691,8 @@ class MultiLabelImpl extends cc.LayerColor {
       });
       this.#loadingPromises.push(generateImageLabel);
     });
-    Promise.all(this.#loadingPromises).then((result) => {
-      result.forEach(() => {
-        if (this.#parent) this.#parent.addChild(this, this.#zOrder);
-      });
+    Promise.all(this.#loadingPromises).then(() => {
+      if (this.#parent) this.#parent.addChild(this, this.#zOrder);
       if (this.#onLoadCompleteCallback) this.#onLoadCompleteCallback(this);
       return undefined;
     }).catch(null);
