@@ -78,6 +78,10 @@ class MultiLabelImpl extends cc.LayerColor {
 
   #clickHandler;
 
+  #parent;
+
+  #zOrder;
+
   // eslint-disable-next-line max-lines-per-function,max-statements
   constructor({
     text = '',
@@ -126,6 +130,9 @@ class MultiLabelImpl extends cc.LayerColor {
     this.#wordOffset = fontSize / wordSpace;
     this.#positionY = containerHeight - this.#lineOffset - 5;
 
+    this.#parent = parent;
+    this.#zOrder = zOrder;
+
     this.#onLoadCompleteCallback = onLoadComplete;
 
     this.#browser = detect();
@@ -154,7 +161,6 @@ class MultiLabelImpl extends cc.LayerColor {
     };
 
     this.setString(text);
-    if (parent) parent.addChild(this, zOrder);
   }
 
   setString = (text: string): void => {
@@ -514,6 +520,7 @@ class MultiLabelImpl extends cc.LayerColor {
     onLoadComplete: (value: unknown) => void): typeof cc.Sprite => new ImageLabel({
     color,
     onLoadComplete,
+    parent: this,
     text: labelText,
     anchor: [0, 0],
     position: [0, 0],
@@ -563,6 +570,7 @@ class MultiLabelImpl extends cc.LayerColor {
     };
 
     const fractionLabel = new Fraction(fraction);
+    this.addChild(fractionLabel);
     this.#offsetForFraction = true;
     return fractionLabel;
   };
@@ -684,7 +692,9 @@ class MultiLabelImpl extends cc.LayerColor {
       this.#loadingPromises.push(generateImageLabel);
     });
     Promise.all(this.#loadingPromises).then((result) => {
-      result.forEach((image) => this.addChild(image));
+      result.forEach(() => {
+        if (this.#parent) this.#parent.addChild(this, this.#zOrder);
+      });
       if (this.#onLoadCompleteCallback) this.#onLoadCompleteCallback(this);
       return undefined;
     }).catch(null);
