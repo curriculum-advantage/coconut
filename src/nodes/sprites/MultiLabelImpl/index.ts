@@ -283,11 +283,12 @@ class MultiLabelImpl extends cc.LayerColor {
 
   #updateForBlankLines = (syntax: string, cleanedText: string): string => {
     if (syntax === this.#styleSyntaxes.blankSyntax && cleanedText.includes(syntax)) {
-      this.#numberReplacedFillIns += 1;
-      return cleanedText.replace(
+      const updateText = cleanedText.replace(
         new RegExp(escapeRegExp(syntax), 'g'),
         this.#fillIns[this.#numberReplacedFillIns],
       );
+      this.#numberReplacedFillIns += 1;
+      return updateText;
     }
     return cleanedText;
   };
@@ -356,7 +357,7 @@ class MultiLabelImpl extends cc.LayerColor {
       return `${cleanedText.replace(new RegExp(escapeRegExp(syntax), 'g'),
         `<span style='display: flex; flex-direction: column'>
           <span style='font-size: ${this.#fontSize + 2}px; display: flex; 
-          transform: scaleX(1.5); justify-content: center;'>&profline;</span>`)}</span>`;
+          transform: scaleX(2); justify-content: center; height: ${this.#fontSize * 0.95}px'>&frown;</span>`)}</span>`;
     }
     return cleanedText;
   };
