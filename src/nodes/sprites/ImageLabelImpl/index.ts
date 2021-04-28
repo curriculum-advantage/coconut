@@ -223,6 +223,11 @@ class ImageLabelImpl extends cc.Sprite {
   };
 
   /**
+   * Return the label font size
+   */
+  getFontSize = (): number => this.#fontSize;
+
+  /**
    * Sets the font size of the image label
    *
    * @param fontSize the label text font size
