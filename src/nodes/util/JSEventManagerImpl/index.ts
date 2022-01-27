@@ -139,7 +139,7 @@ class JSEventManagerImpl {
     return undefined;
   };
 
-  #handleOnTouchBegan = (event) => {
+  handleTouch = (event) => {
     if (!event.changedTouches) return undefined;
 
     const pos = this.#getHTMLElementPosition(this.#canvas);
@@ -155,13 +155,10 @@ class JSEventManagerImpl {
     onTouchMoved,
     onTouchEnded,
   }) => {
-    this.#touchMoved = onTouchMoved;
-    this.#touchEnded = onTouchEnded;
-
     if (onTouchBegan) {
       this.#touchBegan = onTouchBegan;
       this.#canvas.addEventListener('touchstart', (event) => {
-        const originalTouches = this.#handleOnTouchBegan(event);
+        const originalTouches = this.handleTouch(event);
 
         if (originalTouches) {
           const touches = originalTouches.getTouches();
@@ -171,36 +168,36 @@ class JSEventManagerImpl {
           }
         }
       }, false);
+    }
 
-      if (onTouchMoved) {
-        this.#touchMoved = onTouchMoved;
-        this.#canvas.addEventListener('touchmove', (event) => {
-          const originalTouches = this.#handleOnTouchBegan(event);
+    if (onTouchMoved) {
+      this.#touchMoved = onTouchMoved;
+      this.#canvas.addEventListener('touchmove', (event) => {
+        const originalTouches = this.handleTouch(event);
 
-          if (originalTouches) {
-            const touches = originalTouches.getTouches();
-            for (let i = 0; i < touches.length; i += 1) {
-              const currentTouch = touches[i];
-              onTouchMoved(currentTouch, event);
-            }
+        if (originalTouches) {
+          const touches = originalTouches.getTouches();
+          for (let i = 0; i < touches.length; i += 1) {
+            const currentTouch = touches[i];
+            onTouchMoved(currentTouch, event);
           }
-        }, false);
-      }
+        }
+      }, false);
+    }
 
-      if (onTouchEnded) {
-        this.#touchEnded = onTouchEnded;
-        this.#canvas.addEventListener('touchend', (event) => {
-          const originalTouches = this.#handleOnTouchBegan(event);
+    if (onTouchEnded) {
+      this.#touchEnded = onTouchEnded;
+      this.#canvas.addEventListener('touchend', (event) => {
+        const originalTouches = this.handleTouch(event);
 
-          if (originalTouches) {
-            const touches = originalTouches.getTouches();
-            for (let i = 0; i < touches.length; i += 1) {
-              const currentTouch = touches[i];
-              onTouchEnded(currentTouch, event);
-            }
+        if (originalTouches) {
+          const touches = originalTouches.getTouches();
+          for (let i = 0; i < touches.length; i += 1) {
+            const currentTouch = touches[i];
+            onTouchEnded(currentTouch, event);
           }
-        }, false);
-      }
+        }
+      }, false);
     }
   };
 
