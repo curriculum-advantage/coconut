@@ -4,6 +4,7 @@ import BackgroundLayer from './nodes/layers/BackgroundLayer';
 
 import { MultiLabel } from './nodes/sprites/MultiLabelImpl';
 import { ImageLabel } from './nodes/sprites/ImageLabelImpl';
+import { JSEventManager } from './nodes/util/JSEventManagerImpl';
 
 import Paragraph from './utils/Paragraph';
 import Input from './utils/Input';
@@ -40,6 +41,7 @@ import createPseudorandomNumberGenerator from './utils/createPseudorandomNumberG
 import getParameterByName from './utils/getParameterByName';
 import setGlobals from './utils/setGlobals';
 import embeddedQuestionsGenerator from './utils/embeddedQuestionsGenerator';
+import isTouchDevice from './utils/isTouchDevice';
 
 export {
   BackgroundLayer,
@@ -48,6 +50,7 @@ export {
   MultiLabel,
   Paragraph,
   Input,
+  JSEventManager,
 
   addChildren,
   createDoubleTapDetector,
@@ -57,6 +60,7 @@ export {
   frameAnimation,
   getCachedFrame,
   isPointOnTarget,
+  isTouchDevice,
   log,
   setGlobalScale,
   validNumberInput,
@@ -94,6 +98,7 @@ const coconut = {
   MultiLabel,
   Paragraph,
   Input,
+  JSEventManager,
 
   addChildren,
   createDoubleTapDetector,
@@ -103,6 +108,7 @@ const coconut = {
   frameAnimation,
   getCachedFrame,
   isPointOnTarget,
+  isTouchDevice,
   log,
   setGlobalScale,
   validNumberInput,
