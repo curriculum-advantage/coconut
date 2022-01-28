@@ -3,6 +3,8 @@ import CreateCallableConstructor from '../index';
 class JSEventManagerImpl {
   #canvas = document.getElementById('gameCanvas');
 
+  #touchTimeout = 5000;
+
   #touchBegan;
 
   #touchMoved;
@@ -11,11 +13,19 @@ class JSEventManagerImpl {
 
   #enabled = true;
 
-  #preTouchPoint = cc.p(0, 0);
+  #touchesIntegerDict = {};
+
+  #touches = [];
+
+  #maxTouches = 5;
 
   #preTouchPool = [];
 
   #preTouchPoolPointer = 0;
+
+  #indexBitsUsed = 0;
+
+  #preTouchPoint = cc.p(0, 0);
 
   #getPreTouch = (touch) => {
     let preTouch = null;
@@ -27,9 +37,7 @@ class JSEventManagerImpl {
         break;
       }
     }
-    if (!preTouch) {
-      preTouch = touch;
-    }
+    if (!preTouch) preTouch = touch;
     return preTouch;
   };
 
@@ -54,42 +62,61 @@ class JSEventManagerImpl {
     }
   };
 
-  // eslint-disable-next-line max-statements
-  #getTouchesByEvent = (event, pos) => {
-    const touchArr = [];
-    const locView = cc.director.getOpenGLView();
-    const locPreTouch = this.#preTouchPoint;
-    const { length } = event.changedTouches;
-    let touchEvent;
-    let touch;
-    let preLocation;
+  #getUnUsedIndex = () => {
+    let temp = this.#indexBitsUsed;
+    const now = cc.sys.now();
 
-    for (let i = 0; i < length; i += 1) {
-      touchEvent = event.changedTouches[i];
-      if (touchEvent) {
-        let location;
-        if (cc.sys.BROWSER_TYPE_FIREFOX === cc.sys.browserType) {
-          location = locView.convertToLocationInView(touchEvent.pageX, touchEvent.pageY, pos);
-        } else {
-          location = locView.convertToLocationInView(touchEvent.clientX, touchEvent.clientY, pos);
-        }
-        if (touchEvent.identifier != null) {
-          touch = new cc.Touch(location.x, location.y, touchEvent.identifier);
-          preLocation = this.#getPreTouch(touch).getLocation();
-          // eslint-disable-next-line no-underscore-dangle
-          touch._setPrevPoint(preLocation.x, preLocation.y);
-          this.#setPreTouch(touch);
-        } else {
-          touch = new cc.Touch(location.x, location.y);
-          // eslint-disable-next-line no-underscore-dangle
-          touch._setPrevPoint(locPreTouch.x, locPreTouch.y);
-        }
-        locPreTouch.x = location.x;
-        locPreTouch.y = location.y;
-        touchArr.push(touch);
+    for (let i = 0; i < this.#maxTouches; i += 1) {
+      if (!(temp & 0x00000001)) {
+        this.#indexBitsUsed |= (1 << i);
+        return i;
+      }
+      const touch = this.#touches[i];
+      if (now - touch._lastModified > this.#touchTimeout) {
+        this.#removeUsedIndexBit(i);
+        delete this.#touchesIntegerDict[touch.getID()];
+        return i;
+      }
+
+      temp >>= 1;
+    }
+    return -1;
+  };
+
+  #removeUsedIndexBit = (index) => {
+    if (index < 0 || index >= this.#maxTouches) return;
+
+    let temp = 1 << index;
+    temp = ~temp;
+    this.#indexBitsUsed &= temp;
+  };
+
+  #getSetOfTouchesEndOrCancel = (touches) => {
+    let selTouch;
+    let index;
+    let touchID;
+    const handleTouches = [];
+    const locTouches = this.#touches;
+    const locTouchesIntDict = this.#touchesIntegerDict;
+    for (let i = 0, len = touches.length; i < len; i += 1) {
+      selTouch = touches[i];
+      touchID = selTouch.getID();
+      index = locTouchesIntDict[touchID];
+
+      if (index == null) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      if (locTouches[index]) {
+        locTouches[index]._setPoint(selTouch._point);
+        locTouches[index]._setPrevPoint(selTouch._prevPoint);
+        handleTouches.push(locTouches[index]);
+        this.#removeUsedIndexBit(index);
+        delete locTouchesIntDict[touchID];
       }
     }
-    return touchArr;
+    return handleTouches;
   };
 
   #getHTMLElementPosition = (element) => {
@@ -114,40 +141,173 @@ class JSEventManagerImpl {
     };
   };
 
-  #getStartTouches = (touches) => {
+  #getCanvasPosition = () => {
+    const pos = this.#getHTMLElementPosition(this.#canvas);
+    pos.left -= document.body.scrollLeft;
+    pos.top -= document.body.scrollTop;
+    return pos;
+  };
+
+  #getTouchesByEvent = (event, pos) => {
+    const touchArr = [];
+    const locView = cc.director.getOpenGLView();
+    let touchEvent;
+    let touch;
+    let preLocation;
+    const locPreTouch = this.#preTouchPoint;
+
+    const { length } = event.changedTouches;
+    for (let i = 0; i < length; i += 1) {
+      touchEvent = event.changedTouches[i];
+      if (touchEvent) {
+        let location;
+        if (cc.sys.BROWSER_TYPE_FIREFOX === cc.sys.browserType) {
+          location = locView.convertToLocationInView(touchEvent.pageX, touchEvent.pageY, pos);
+        } else {
+          location = locView.convertToLocationInView(touchEvent.clientX, touchEvent.clientY, pos);
+        }
+        if (touchEvent.identifier != null) {
+          touch = new cc.Touch(location.x, location.y, touchEvent.identifier);
+          // use Touch Pool
+          preLocation = this.#getPreTouch(touch).getLocation();
+          touch._setPrevPoint(preLocation.x, preLocation.y);
+          this.#setPreTouch(touch);
+        } else {
+          touch = new cc.Touch(location.x, location.y);
+          touch._setPrevPoint(locPreTouch.x, locPreTouch.y);
+        }
+        locPreTouch.x = location.x;
+        locPreTouch.y = location.y;
+        touchArr.push(touch);
+      }
+    }
+    return touchArr;
+  };
+
+  #handleTouchesBegin = (touches) => {
     let selTouch;
+    let index;
     let curTouch;
+    let touchID;
     const handleTouches = [];
+    const locTouchIntDict = this.#touchesIntegerDict;
     const now = cc.sys.now();
     for (let i = 0, len = touches.length; i < len; i += 1) {
       selTouch = touches[i];
+      touchID = selTouch.getID();
+      index = locTouchIntDict[touchID];
 
-      // eslint-disable-next-line no-underscore-dangle
-      curTouch = new cc.Touch(selTouch._point.x, selTouch._point.y, selTouch.getID());
-      // eslint-disable-next-line no-underscore-dangle
-      curTouch._lastModified = now;
-      // eslint-disable-next-line no-underscore-dangle
-      curTouch._setPrevPoint(selTouch._prevPoint);
-      handleTouches.push(curTouch);
+      if (index == null) {
+        const unusedIndex = this.#getUnUsedIndex();
+        if (unusedIndex === -1) {
+          continue;
+        }
+
+        curTouch = new cc.Touch(selTouch._point.x, selTouch._point.y, selTouch.getID());
+        this.#touches[unusedIndex] = new cc.Touch(selTouch._point.x, selTouch._point.y,
+          selTouch.getID());
+        curTouch._lastModified = now;
+        curTouch._setPrevPoint(selTouch._prevPoint);
+        locTouchIntDict[touchID] = unusedIndex;
+        handleTouches.push(curTouch);
+      }
     }
     if (handleTouches.length > 0) {
-      // eslint-disable-next-line no-underscore-dangle
-      cc.director.getOpenGLView()
-        ._convertTouchesWithScale(handleTouches);
+      cc.director.getOpenGLView()._convertTouchesWithScale(handleTouches);
       return new cc.EventTouch(handleTouches);
     }
     return undefined;
   };
 
-  handleTouch = (event) => {
-    if (!event.changedTouches) return undefined;
+  #handTouchBegan = (onTouchBegan) => {
+    this.#touchBegan = onTouchBegan;
+    this.#canvas.addEventListener('touchstart', (event) => {
+      if (!event.changedTouches) return;
+      const cocosTouchEvent = this.#handleTouchesBegin(
+        this.#getTouchesByEvent(event, this.#getCanvasPosition()),
+      );
 
-    const pos = this.#getHTMLElementPosition(this.#canvas);
-    pos.left -= document.body.scrollLeft;
-    pos.top -= document.body.scrollTop;
+      if (onTouchBegan && cocosTouchEvent) {
+        const touches = cocosTouchEvent.getTouches();
+        for (let i = 0; i < touches.length; i += 1) {
+          const currentTouch = touches[i];
+          onTouchBegan(currentTouch, cocosTouchEvent);
+        }
+      }
+    }, false);
+  };
 
-    const touches = this.#getTouchesByEvent(event, pos);
-    return this.#getStartTouches(touches);
+  #handleTouchesMove = (touches) => {
+    let selTouch;
+    let index;
+    let touchID;
+    const handleTouches = [];
+    const locTouches = this.#touches;
+    const now = cc.sys.now();
+    for (let i = 0, len = touches.length; i < len; i += 1) {
+      selTouch = touches[i];
+      touchID = selTouch.getID();
+      index = this.#touchesIntegerDict[touchID];
+
+      if (index == null) {
+        continue;
+      }
+      if (locTouches[index]) {
+        locTouches[index]._setPoint(selTouch._point);
+        locTouches[index]._setPrevPoint(selTouch._prevPoint);
+        locTouches[index]._lastModified = now;
+        handleTouches.push(locTouches[index]);
+      }
+    }
+    if (handleTouches.length > 0) {
+      cc.director.getOpenGLView()._convertTouchesWithScale(handleTouches);
+      return new cc.EventTouch(handleTouches);
+    }
+    return undefined;
+  };
+
+  #handleTouchMoved = (onTouchMoved) => {
+    this.#touchMoved = onTouchMoved;
+    this.#canvas.addEventListener('touchmove', (event) => {
+      if (!event.changedTouches) return;
+
+      const cocosTouchEvent = this.#handleTouchesMove(
+        this.#getTouchesByEvent(event, this.#getCanvasPosition()),
+      );
+      if (onTouchMoved && cocosTouchEvent) {
+        const touches = cocosTouchEvent.getTouches();
+        for (let i = 0; i < touches.length; i += 1) {
+          const currentTouch = touches[i];
+          onTouchMoved(currentTouch, cocosTouchEvent);
+        }
+      }
+    }, false);
+  };
+
+  #handleTouchesEnd = (touches) => {
+    const handleTouches = this.#getSetOfTouchesEndOrCancel(touches);
+    if (handleTouches.length > 0) {
+      cc.director.getOpenGLView()._convertTouchesWithScale(handleTouches);
+      return new cc.EventTouch(handleTouches);
+    }
+    return undefined;
+  };
+
+  #handleTouchEnd = (onTouchEnded) => {
+    this.#touchEnded = onTouchEnded;
+    this.#canvas.addEventListener('touchend', (event) => {
+      const cocosTouchEvent = this.#handleTouchesEnd(
+        this.#getTouchesByEvent(event, this.#getCanvasPosition()),
+      );
+
+      if (onTouchEnded && cocosTouchEvent) {
+        const touches = cocosTouchEvent.getTouches();
+        for (let i = 0; i < touches.length; i += 1) {
+          const currentTouch = touches[i];
+          onTouchEnded(currentTouch, cocosTouchEvent);
+        }
+      }
+    }, false);
   };
 
   addListener = ({
@@ -155,59 +315,18 @@ class JSEventManagerImpl {
     onTouchMoved,
     onTouchEnded,
   }) => {
-    if (onTouchBegan) {
-      this.#touchBegan = onTouchBegan;
-      this.#canvas.addEventListener('touchstart', (event) => {
-        const originalTouches = this.handleTouch(event);
-
-        if (originalTouches) {
-          const touches = originalTouches.getTouches();
-          for (let i = 0; i < touches.length; i += 1) {
-            const currentTouch = touches[i];
-            onTouchBegan(currentTouch, event);
-          }
-        }
-      }, false);
-    }
-
-    if (onTouchMoved) {
-      this.#touchMoved = onTouchMoved;
-      this.#canvas.addEventListener('touchmove', (event) => {
-        const originalTouches = this.handleTouch(event);
-
-        if (originalTouches) {
-          const touches = originalTouches.getTouches();
-          for (let i = 0; i < touches.length; i += 1) {
-            const currentTouch = touches[i];
-            onTouchMoved(currentTouch, event);
-          }
-        }
-      }, false);
-    }
-
-    if (onTouchEnded) {
-      this.#touchEnded = onTouchEnded;
-      this.#canvas.addEventListener('touchend', (event) => {
-        const originalTouches = this.handleTouch(event);
-
-        if (originalTouches) {
-          const touches = originalTouches.getTouches();
-          for (let i = 0; i < touches.length; i += 1) {
-            const currentTouch = touches[i];
-            onTouchEnded(currentTouch, event);
-          }
-        }
-      }, false);
-    }
+    this.#handTouchBegan(onTouchBegan);
+    this.#handleTouchMoved(onTouchMoved);
+    this.#handleTouchEnd(onTouchEnded);
   };
 
-  setEnabled = (enabled: boolean): void => {
+  setEnabled = (enabled) => {
     this.#enabled = enabled;
   };
 
-  isEnabled = (): boolean => this.#enabled;
+  isEnabled = () => this.#enabled;
 
-  removeAllListeners = (): void => {
+  removeAllListeners = () => {
     if (this.#touchBegan) {
       this.#canvas.removeEventListener('touchstart', this.#touchBegan);
       this.#touchBegan = undefined;
