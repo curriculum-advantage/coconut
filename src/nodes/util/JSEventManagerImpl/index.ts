@@ -222,16 +222,19 @@ class JSEventManagerImpl {
   #handTouchBegan = (onTouchBegan) => {
     this.#touchBegan = onTouchBegan;
     this.#canvas.addEventListener('touchstart', (event) => {
-      if (!event.changedTouches) return;
-      const cocosTouchEvent = this.#handleTouchesBegin(
-        this.#getTouchesByEvent(event, this.#getCanvasPosition()),
-      );
+      if (this.#enabled) {
+        if (!event.changedTouches) return;
 
-      if (onTouchBegan && cocosTouchEvent) {
-        const touches = cocosTouchEvent.getTouches();
-        for (let i = 0; i < touches.length; i += 1) {
-          const currentTouch = touches[i];
-          onTouchBegan(currentTouch, cocosTouchEvent);
+        const cocosTouchEvent = this.#handleTouchesBegin(
+          this.#getTouchesByEvent(event, this.#getCanvasPosition()),
+        );
+
+        if (onTouchBegan && cocosTouchEvent) {
+          const touches = cocosTouchEvent.getTouches();
+          for (let i = 0; i < touches.length; i += 1) {
+            const currentTouch = touches[i];
+            onTouchBegan(currentTouch, cocosTouchEvent);
+          }
         }
       }
     }, false);
@@ -269,16 +272,18 @@ class JSEventManagerImpl {
   #handleTouchMoved = (onTouchMoved) => {
     this.#touchMoved = onTouchMoved;
     this.#canvas.addEventListener('touchmove', (event) => {
-      if (!event.changedTouches) return;
+      if (this.#enabled) {
+        if (!event.changedTouches) return;
 
-      const cocosTouchEvent = this.#handleTouchesMove(
-        this.#getTouchesByEvent(event, this.#getCanvasPosition()),
-      );
-      if (onTouchMoved && cocosTouchEvent) {
-        const touches = cocosTouchEvent.getTouches();
-        for (let i = 0; i < touches.length; i += 1) {
-          const currentTouch = touches[i];
-          onTouchMoved(currentTouch, cocosTouchEvent);
+        const cocosTouchEvent = this.#handleTouchesMove(
+          this.#getTouchesByEvent(event, this.#getCanvasPosition()),
+        );
+        if (onTouchMoved && cocosTouchEvent) {
+          const touches = cocosTouchEvent.getTouches();
+          for (let i = 0; i < touches.length; i += 1) {
+            const currentTouch = touches[i];
+            onTouchMoved(currentTouch, cocosTouchEvent);
+          }
         }
       }
     }, false);
@@ -296,15 +301,19 @@ class JSEventManagerImpl {
   #handleTouchEnd = (onTouchEnded) => {
     this.#touchEnded = onTouchEnded;
     this.#canvas.addEventListener('touchend', (event) => {
-      const cocosTouchEvent = this.#handleTouchesEnd(
-        this.#getTouchesByEvent(event, this.#getCanvasPosition()),
-      );
+      if (this.#enabled) {
+        if (!event.changedTouches) return;
 
-      if (onTouchEnded && cocosTouchEvent) {
-        const touches = cocosTouchEvent.getTouches();
-        for (let i = 0; i < touches.length; i += 1) {
-          const currentTouch = touches[i];
-          onTouchEnded(currentTouch, cocosTouchEvent);
+        const cocosTouchEvent = this.#handleTouchesEnd(
+          this.#getTouchesByEvent(event, this.#getCanvasPosition()),
+        );
+
+        if (onTouchEnded && cocosTouchEvent) {
+          const touches = cocosTouchEvent.getTouches();
+          for (let i = 0; i < touches.length; i += 1) {
+            const currentTouch = touches[i];
+            onTouchEnded(currentTouch, cocosTouchEvent);
+          }
         }
       }
     }, false);
