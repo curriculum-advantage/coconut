@@ -327,6 +327,7 @@ class JSEventManagerImpl {
     this.#handTouchBegan(onTouchBegan);
     this.#handleTouchMoved(onTouchMoved);
     this.#handleTouchEnd(onTouchEnded);
+    return this;
   };
 
   setEnabled = (enabled) => {
