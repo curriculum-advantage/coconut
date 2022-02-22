@@ -58,6 +58,7 @@ export const queueAudio = (source, {
   onDone?: audioCallback;
 } = {}) => {
   queue.push(new Howl({
+    html5: true,
     src: [source],
     onplay: onPlay,
     onend(id) {
@@ -108,6 +109,7 @@ export const playEffect = (source, {
   autoplay?: boolean;
 } = {}) => {
   const effect = new Howl({
+    html5: true,
     volume,
     loop,
     onplay: () => {
