@@ -445,6 +445,9 @@ class ImageLabelImpl extends cc.Sprite {
   };
 
   #addListener = (): void => {
+    if (this.#listener) {
+      cc.eventManager.removeListener(this.#listener);
+    }
     this.#listener = cc.eventManager.addListener({
       event: cc.EventListener.TOUCH_ONE_BY_ONE,
       swallowTouches: false,
