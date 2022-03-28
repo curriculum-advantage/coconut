@@ -2,7 +2,7 @@
   "name": "@curriculum-advantage/coconut",
   "description": "Utility library for Cocos2d-html5 that makes it easier to create HTML games.",
   "publisher": "Curriculum Advantage",
-  "version": "2.3.5",
+  "version": "2.4.0",
   "main": "dist/main.js",
   "types": "dist/index.d.ts",
   "files": [
