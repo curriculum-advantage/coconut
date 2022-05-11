@@ -175,7 +175,6 @@ class ImageLabelImpl extends cc.Sprite {
    */
   setString = (text: string, onLoadComplete = this.#onLoadCompleteCallback): void => {
     this.#onLoadCompleteCallback = onLoadComplete;
-    this.#isVisible = true;
     this.#queue.enqueue(text);
     if (!this.#rendering) {
       this.#setStringFromQueue(this.#queue.dequeue());
@@ -342,6 +341,11 @@ class ImageLabelImpl extends cc.Sprite {
     this.#addShadow = false;
     this.#shadowProperty = undefined;
     this.setString(this.#text);
+  };
+
+  setVisible = (visible: boolean): void => {
+    super.setVisible(visible);
+    this.#isVisible = visible;
   };
 
   #setStringFromQueue = (text: string): void => {
