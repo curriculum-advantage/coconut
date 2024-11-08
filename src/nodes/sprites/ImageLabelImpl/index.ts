@@ -433,7 +433,7 @@ class ImageLabelImpl extends cc.Sprite {
       .catch(() => {});
   };
 
-  #getCanvas = (textElement: HTMLElement): any => htmlToImage.toCanvas(textElement, { pixelRatio: 1 });
+  #getCanvas = (textElement: HTMLElement): any => htmlToImage.toCanvas(textElement, { pixelRatio: 1, backgroundColor: this.#backgroundColor });
 
   #createTextSprite = (imageTexture: typeof cc.TEXTURE): void => {
     this.setVisible(this.#isVisible);
