@@ -2,7 +2,7 @@
   "name": "@curriculum-advantage/coconut",
   "description": "Utility library for Cocos2d-html5 that makes it easier to create HTML games.",
   "publisher": "Curriculum Advantage",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "main": "dist/main.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -35,7 +35,7 @@
     "test:coverage": "cross-env jest --coverage",
     "config": "cross-env webpack --config tools/webpack/webpack.config.ts",
     "bundle": "cross-env npm run config -- --mode production",
-    "dev": "cross-env npm run config -- --mode development --watch --progress --display-error-details",
+    "dev": "cross-env npm run config -- --mode development --watch --progress",
     "prepare": "cross-env npm run clean && npm run bundle && npm run types",
     "convertMathJaxJson": "cross-env node src/lib/jsonConversion/jsonConversion.js data/"
   },
@@ -58,6 +58,7 @@
     "detect-browser": "^5.3.0",
     "hash-it": "^5.0.2",
     "howler": "^2.2.3",
+    "html-to-image": "^1.11.11",
     "html2canvas": "^1.4.1",
     "is_js": "^0.9.0",
     "lodash": "^4.17.21",

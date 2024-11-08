@@ -2,6 +2,35 @@ import { range } from 'lodash';
 import { primaryFont } from '../../lib/constants';
 import { ImageLabel } from '../../nodes/sprites/ImageLabelImpl';
 
+
+function cutSentences(sentences, maxLength) {
+  const result = [];
+
+  for (const sentence of sentences) {
+    if (sentence.length <= maxLength) {
+      result.push(sentence);
+    } else {
+      const words = sentence.split(' ');
+      let currentSentence = '';
+
+      for (const word of words) {
+        if (currentSentence.length + word.length + 1 <= maxLength) {
+          currentSentence += (currentSentence ? ' ' : '') + word;
+        } else {
+          result.push(currentSentence);
+          currentSentence = word;
+        }
+      }
+
+      if (currentSentence) {
+        result.push(currentSentence);
+      }
+    }
+  }
+
+  return result;
+}
+
 /*
  * TODO: Underline, background colors, placeholders (fill in blank), vertical text
  * alignment, events for dynamic updates(e.g.highlight on click).
@@ -55,6 +84,8 @@ class Paragraph extends cc.Node {
     fontColorPrimary = [0, 0, 0],
     lineHeight = 1.2,
     cleanDom = true,
+    sliceBySentence = false,
+    sliceBySentenceMaxCharLength = 25,
   }) {
     super();
     this.fontColorPrimary = fontColorPrimary;
@@ -67,6 +98,8 @@ class Paragraph extends cc.Node {
     this.fontName = fontName;
     this.lineHeight = lineHeight;
     this.cleanDom = cleanDom;
+    this.sliceBySentence = sliceBySentence;
+    this.sliceBySentenceMaxCharLength = sliceBySentenceMaxCharLength;
     this.containerDimensions = containerDimensions;
     this.setInitialState();
     this.setup(parent, position, anchor, text);
@@ -175,12 +208,19 @@ class Paragraph extends cc.Node {
   }
 
   addLabel(char, isLastChar, settings) {
-    if (char === '_') {
+    if (this.sliceBySentence) {
       this.shouldLineBreak = true;
-    } else {
       this.addLabelToWordNode(char, settings);
-      if (isLastChar || char === ' ') this.addWordNode();
+      if (isLastChar || char === ' _') this.addWordNode();
+    } else {
+      if (char === '_') {
+        this.shouldLineBreak = true;
+      } else {
+        this.addLabelToWordNode(char, settings);
+        if (isLastChar || char === ' ') this.addWordNode();
+      }
     }
+
   }
 
   // Get clean paragraph text without span element wrappers.
@@ -213,7 +253,7 @@ class Paragraph extends cc.Node {
       this.parsedText += `${textBetweenSpans}${spanText}`;
 
       // Save settings along with location in the parsed text that they apply to.
-      this.formattedSubstrings.push({ settings, indexRange });
+      this.formattedSubstrings.push({ settings, indexRange, spanText });
 
       previousLastIndex = spanRegex.lastIndex;
     }
@@ -223,24 +263,36 @@ class Paragraph extends cc.Node {
   }
 
   addLabels() {
-    let currentIndex = 0;
-    const parsedTextChars = this.parsedText.split('');
+    if (this.sliceBySentence) {
+      const parsedSentences = cutSentences(this.parsedText.split(' _'), this.sliceBySentenceMaxCharLength);
 
-    // Create a label for every character, allowing for precision formatting.
-    parsedTextChars.forEach((char, i) => {
-      const isLastChar = i === parsedTextChars.length - 1;
-      const index = this.parsedText.indexOf(char, currentIndex);
+      parsedSentences.forEach((sentence, index) => {
+        const formattedSubstring = this.formattedSubstrings.find((format) => {
+          const [start, end] = format.indexRange;
+          return range(start, end).includes(index);
+        }) || {};
+        this.addLabel(sentence, true, formattedSubstring.settings);
+      });
+    } else {
+      let currentIndex = 0;
+      const parsedTextChars = this.parsedText.split('');
 
-      // Find any formatting settings that belong to this character.
-      const formattedSubstring = this.formattedSubstrings.find((format) => {
-        const [start, end] = format.indexRange;
-        return range(start, end).includes(index);
-      }) || {};
+      // Create a label for every character, allowing for precision formatting.
+      parsedTextChars.forEach((char, i) => {
+        const isLastChar = i === parsedTextChars.length - 1;
+        const index = this.parsedText.indexOf(char, currentIndex);
 
-      this.addLabel(char, isLastChar, formattedSubstring.settings);
+        // Find any formatting settings that belong to this character.
+        const formattedSubstring = this.formattedSubstrings.find((format) => {
+          const [start, end] = format.indexRange;
+          return range(start, end).includes(index);
+        }) || {};
 
-      currentIndex += char.length;
-    });
+        this.addLabel(char, isLastChar, formattedSubstring.settings);
+
+        currentIndex += char.length;
+      });
+    }
   }
 
   // Invoked every time the text is dynamically changed, updating positional calculations (e.g. a

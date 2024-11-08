@@ -1,9 +1,9 @@
-import html2canvas from 'html2canvas';
 import hash from 'hash-it';
 import { primaryFont } from '../../../lib/constants';
 import CreateCallableConstructor from '../../util';
 import isPointOnTarget from '../../../utils/isPointOnTarget';
 import Queue from '../../../utils/Queue';
+import * as htmlToImage from 'html-to-image';
 
 /**
  * Creates a Cocos image sprite as a label.
@@ -373,9 +373,9 @@ class ImageLabelImpl extends cc.Sprite {
 
   // eslint-disable-next-line max-statements
   #generateTextSpan = (text: string): HTMLElement => {
-    const textElement = document.createElement('p');
+    const textElement = document.createElement('div');
 
-    textElement.innerHTML = text;
+    textElement.innerText = text;
 
     textElement.style.fontSize = `${this.#fontSize}px`;
     textElement.style.fontWeight = String(this.#fontWeight);
@@ -390,15 +390,16 @@ class ImageLabelImpl extends cc.Sprite {
 
     textElement.style.width = this.#containerWidth === 0 ? 'max-content' : `${this.#containerWidth}px`;
     textElement.style.height = this.#containerHeight === 0 ? 'auto' : `${this.#containerHeight}px`;
-
-    if (this.#cleanDom) {
-      textElement.style.margin = '0 auto';
-      textElement.style.position = 'absolute';
-      textElement.style.left = '50%';
-      textElement.style.top = '50%';
-      textElement.style.zIndex = '-999';
-    }
-
+    //
+    // Used in old ImageLabel (no longer needed but keeping in case we change our mind)
+    // if (this.#cleanDom) {
+    //   textElement.style.margin = '0 auto';
+    //   textElement.style.position = 'absolute';
+    //   textElement.style.left = '50%';
+    //   textElement.style.top = '50%';
+    //   textElement.style.zIndex = '-999';
+    // }
+    //
     textElement.style.justifyContent = this.#horizontalAlign;
     textElement.style.alignItems = this.#verticalAlign;
     textElement.style.textAlign = this.#textAlign;
@@ -417,7 +418,7 @@ class ImageLabelImpl extends cc.Sprite {
     textElement.style.lineHeight = this.#lineHeight;
     textElement.style.wordSpacing = this.#wordSpacing;
 
-    document.body.append(textElement);
+    document.body.appendChild(textElement);
     return textElement;
   };
 
@@ -432,11 +433,7 @@ class ImageLabelImpl extends cc.Sprite {
       .catch(() => {});
   };
 
-  #getCanvas = (textElement: HTMLElement): Promise<HTMLCanvasElement> => html2canvas(textElement, {
-    backgroundColor: this.#backgroundColor,
-    scale: 1,
-    logging: false,
-  });
+  #getCanvas = (textElement: HTMLElement): any => htmlToImage.toCanvas(textElement, { pixelRatio: 1 });
 
   #createTextSprite = (imageTexture: typeof cc.TEXTURE): void => {
     this.setVisible(this.#isVisible);
