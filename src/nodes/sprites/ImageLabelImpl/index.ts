@@ -375,7 +375,7 @@ class ImageLabelImpl extends cc.Sprite {
   #generateTextSpan = (text: string): HTMLElement => {
     const textElement = document.createElement('div');
 
-    textElement.innerText = text;
+    textElement.innerHTML = text;
 
     textElement.style.fontSize = `${this.#fontSize}px`;
     textElement.style.fontWeight = String(this.#fontWeight);
